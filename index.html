@@ -1447,128 +1447,1291 @@
 </section>
 
 <!-- ============================ FIRST WORKFLOW ============================ -->
+<style>
+  /* ============ Detailed step styles ============ */
+  .fw-intro {
+    margin-top: 50px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 36px 40px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 50px;
+    align-items: center;
+  }
+  @media (max-width: 900px) { .fw-intro { grid-template-columns: 1fr; gap: 28px; padding: 28px; } }
+  .fw-intro h3 { font-family: 'Fraunces', serif; font-style: italic; font-size: 30px; color: var(--paper); }
+  .fw-intro p { color: var(--paper-dim); font-size: 15.5px; margin-top: 12px; line-height: 1.6; }
+  .fw-intro .badge-stack { display:flex; gap:8px; margin-top: 18px; flex-wrap: wrap;}
+  .fw-intro .badge-stack span {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    padding: 5px 11px; border-radius: 4px;
+    background: var(--ink-3); color: var(--paper-dim); border: 1px solid var(--line);
+    letter-spacing: .1em;
+  }
+  .fw-intro .badge-stack span.hot { background: var(--hot); color: var(--ink); border-color: var(--hot); }
+
+  .fw-finalflow {
+    background: var(--ink); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 24px;
+    display: grid; gap: 14px;
+  }
+  .fw-finalflow .fnode {
+    display: grid; grid-template-columns: 36px 1fr;
+    gap: 14px; align-items: center;
+    padding: 10px 14px;
+    background: var(--ink-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    position: relative;
+  }
+  .fw-finalflow .fnode::after {
+    content: "↓"; position: absolute;
+    bottom: -16px; left: 28px;
+    color: var(--line-2); font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+  .fw-finalflow .fnode:last-child::after { display: none; }
+  .fw-finalflow .fnode .ix {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: grid; place-items: center; color: var(--ink);
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px;
+  }
+  .fw-finalflow .fnode .nm { font-weight: 600; font-size: 14px; }
+  .fw-finalflow .fnode .ds { font-size: 12px; color: var(--mute); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+  .fw-finalflow .fnode:nth-child(1) .ix { background: var(--hot); }
+  .fw-finalflow .fnode:nth-child(2) .ix { background: var(--amber); }
+  .fw-finalflow .fnode:nth-child(3) .ix { background: var(--cyan); }
+  .fw-finalflow .fnode:nth-child(4) .ix { background: var(--violet); color: var(--paper); }
+  .fw-finalflow .fnode:nth-child(5) .ix { background: var(--acid); }
+
+  .bigstep {
+    margin-top: 80px;
+    padding-top: 60px;
+    border-top: 1px solid var(--line);
+  }
+  .bigstep:first-of-type { border-top: 0; padding-top: 30px; margin-top: 40px; }
+
+  .bigstep-head {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 30px;
+    align-items: baseline;
+    margin-bottom: 40px;
+  }
+  .bigstep-head .bignum {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 110px; line-height: 0.9;
+    color: var(--hot);
+  }
+  .bigstep-head h3 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.05;
+  }
+  .bigstep-head h3 em { color: var(--hot); font-style: italic; }
+  .bigstep-head .step-intro { color: var(--paper-dim); font-size: 16px; margin-top: 14px; max-width: 720px; line-height: 1.6; }
+  .bigstep-head .step-intro b { color: var(--paper); font-weight: 600; }
+  @media (max-width: 800px) {
+    .bigstep-head { grid-template-columns: 1fr; gap: 8px; }
+    .bigstep-head .bignum { font-size: 64px; }
+  }
+
+  .bigstep-body {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 36px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) { .bigstep-body { grid-template-columns: 1fr; gap: 22px; } }
+
+  .substeps {
+    counter-reset: sub;
+    list-style: none;
+    padding: 0; margin: 0;
+  }
+  .substeps li {
+    counter-increment: sub;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--paper-dim);
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  .substeps li:last-child { border-bottom: 0; }
+  .substeps li::before {
+    content: counter(sub);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--hot);
+    background: rgba(234,75,113,0.1);
+    border: 1px solid rgba(234,75,113,0.3);
+    border-radius: 6px;
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .substeps li b { color: var(--paper); font-weight: 600; }
+  .substeps li kbd {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--ink-3);
+    border: 1px solid var(--line-2);
+    border-bottom-width: 2px;
+    color: var(--paper);
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 11.5px;
+  }
+  .substeps li code {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--acid);
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+
+  /* The "screenshot" mockup */
+  .screen {
+    background: #0f0f17;
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.4);
+    font-family: 'Manrope', sans-serif;
+    position: relative;
+  }
+  .screen-bar {
+    height: 38px;
+    background: #15151f;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center;
+    padding: 0 14px;
+    gap: 14px;
+    font-size: 11.5px;
+  }
+  .screen-bar .traffic { display: flex; gap: 6px; }
+  .screen-bar .traffic span {
+    width: 11px; height: 11px; border-radius: 50%;
+  }
+  .screen-bar .traffic span:nth-child(1) { background: #ef4444; }
+  .screen-bar .traffic span:nth-child(2) { background: #f59e0b; }
+  .screen-bar .traffic span:nth-child(3) { background: #10b981; }
+  .screen-bar .title {
+    flex: 1;
+    color: var(--mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-align: center;
+  }
+  .screen-bar .active-toggle {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--mute);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  }
+  .screen-bar .active-toggle .tg {
+    width: 26px; height: 14px; background: var(--line-2);
+    border-radius: 999px; position: relative;
+  }
+  .screen-bar .active-toggle .tg::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 10px; height: 10px; border-radius: 50%; background: var(--paper);
+  }
+  .screen-bar .active-toggle.on .tg { background: var(--acid); }
+  .screen-bar .active-toggle.on .tg::after { left: 14px; background: var(--ink); }
+  .screen-bar .exec-btn {
+    background: var(--hot); color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    padding: 5px 11px; border-radius: 4px; font-weight: 700;
+  }
+
+  .screen-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 420px;
+  }
+  .screen-sidebar {
+    background: #0c0c14;
+    border-right: 1px solid var(--line);
+    padding: 16px 14px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    color: var(--mute);
+  }
+  .screen-sidebar h6 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--mute);
+    margin: 14px 0 8px; font-weight: 500;
+  }
+  .screen-sidebar h6:first-child { margin-top: 0; }
+  .screen-sidebar .sb-item {
+    padding: 6px 10px; border-radius: 4px;
+    display: flex; align-items: center; gap: 8px;
+    cursor: default;
+    color: var(--paper-dim);
+  }
+  .screen-sidebar .sb-item.active { background: var(--ink-3); color: var(--paper); }
+  .screen-sidebar .sb-item .dt { width: 6px; height: 6px; border-radius: 50%; background: var(--hot); }
+
+  .screen-canvas {
+    position: relative;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0);
+    background-size: 18px 18px;
+    padding: 30px;
+    overflow: hidden;
+  }
+  .scn { /* canvas node */
+    position: absolute;
+    background: #1a1a26;
+    border: 1.5px solid var(--line-2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 130px;
+    display: flex; flex-direction: column; gap: 4px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .scn.lit { border-color: var(--hot); box-shadow: 0 0 0 3px rgba(234,75,113,0.15); }
+  .scn.cur { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(106,215,229,0.18); }
+  .scn .scn-ico {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: grid; place-items: center; color: var(--ink);
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px;
+  }
+  .scn .scn-name { font-size: 12px; font-weight: 600; color: var(--paper); }
+  .scn .scn-sub { font-size: 10px; color: var(--mute); font-family: 'JetBrains Mono', monospace; }
+  .scn.trigger .scn-ico { background: var(--hot); }
+  .scn.logic .scn-ico { background: var(--amber); }
+  .scn.action .scn-ico { background: var(--cyan); }
+  .scn.notify .scn-ico { background: var(--violet); color: var(--paper); }
+  .scn.sheet .scn-ico { background: var(--acid); }
+
+  .scn-handle {
+    position: absolute;
+    top: 50%;
+    right: -7px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--paper);
+    transform: translateY(-50%);
+    border: 2px solid var(--ink);
+  }
+  .scn-handle.left { right: auto; left: -7px; }
+
+  .scn-wire {
+    position: absolute;
+    border-top: 2px dashed var(--line-2);
+  }
+  .scn-wire.live { border-top-color: var(--hot); }
+
+  /* Inspector mock */
+  .inspector {
+    background: #0d0d15;
+    border-top: 1px solid var(--line);
+    padding: 18px 20px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .inspector h6 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--hot); margin: 0 0 12px; font-weight: 600;
+  }
+  .field {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--line);
+    align-items: center;
+  }
+  .field:last-child { border-bottom: 0; }
+  .field .lab {
+    font-size: 12px; color: var(--mute);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .field .val {
+    background: var(--ink); border: 1px solid var(--line);
+    border-radius: 5px; padding: 6px 10px;
+    font-size: 12.5px; color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .field .val.exp { color: var(--acid); border-color: rgba(200,255,77,0.3); background: rgba(200,255,77,0.05); }
+  .field .val.exp::after { content: "{ }"; color: var(--mute); font-size: 10px; }
+  .field .val.dropdown::after { content: "▾"; color: var(--mute); }
+  .field .val.checked::before { content: "✓ "; color: var(--acid); }
+
+  .url-row {
+    display: grid; grid-template-columns: 110px 1fr;
+    gap: 10px; padding: 8px 0; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+  .url-row .url-lab { color: var(--mute); }
+  .url-row .url-val {
+    background: var(--ink); border: 1px solid var(--line);
+    padding: 5px 9px; border-radius: 4px;
+    color: var(--cyan); word-break: break-all;
+  }
+
+  .listening {
+    margin-top: 12px;
+    background: rgba(234,75,113,0.08);
+    border: 1px solid rgba(234,75,113,0.3);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--hot);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .listening::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--hot);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(234,75,113,0.5); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(234,75,113,0); }
+  }
+
+  /* Output JSON panel */
+  .output-pane {
+    margin-top: 22px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  .output-pane .op-bar {
+    background: var(--ink-3);
+    padding: 8px 14px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .output-pane .op-bar .op-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--acid);
+  }
+  .output-pane .op-bar .op-tabs {
+    display: flex; gap: 4px; margin-left: auto;
+  }
+  .output-pane .op-bar .op-tabs span {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 3px 9px; border-radius: 3px;
+    color: var(--mute);
+  }
+  .output-pane .op-bar .op-tabs span.on { background: var(--ink); color: var(--paper); }
+  .output-pane pre {
+    margin: 0; padding: 18px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--paper-dim);
+    overflow-x: auto;
+  }
+  .output-pane pre .k { color: var(--hot); }
+  .output-pane pre .s { color: var(--acid); }
+  .output-pane pre .n { color: var(--cyan); }
+  .output-pane pre .c { color: var(--mute); font-style: italic; }
+  .output-pane pre .b { color: var(--violet); }
+
+  /* Callouts */
+  .callout {
+    margin-top: 22px;
+    border-radius: var(--r);
+    padding: 18px 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+    padding-left: 60px;
+  }
+  .callout::before {
+    position: absolute;
+    left: 20px; top: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    border-radius: 6px;
+  }
+  .callout.mistake {
+    background: rgba(234,75,113,0.07);
+    border: 1px solid rgba(234,75,113,0.25);
+    color: var(--paper-dim);
+  }
+  .callout.mistake::before { content: "✕"; background: var(--hot); color: var(--ink); }
+  .callout.mistake b { color: var(--hot-2); }
+  .callout.tip {
+    background: rgba(246,177,90,0.07);
+    border: 1px solid rgba(246,177,90,0.25);
+    color: var(--paper-dim);
+  }
+  .callout.tip::before { content: "★"; background: var(--amber); color: var(--ink); }
+  .callout.tip b { color: var(--amber); }
+  .callout.success {
+    background: rgba(200,255,77,0.07);
+    border: 1px solid rgba(200,255,77,0.25);
+    color: var(--paper-dim);
+  }
+  .callout.success::before { content: "✓"; background: var(--acid); color: var(--ink); }
+  .callout.success b { color: var(--acid); }
+
+  /* Test command block */
+  .testcmd {
+    margin-top: 16px;
+    background: #050507;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--paper-dim);
+    overflow-x: auto;
+    position: relative;
+  }
+  .testcmd::before {
+    content: "$ test request";
+    position: absolute;
+    top: -8px; left: 14px;
+    background: var(--ink);
+    color: var(--mute);
+    font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+    padding: 0 8px;
+  }
+  .testcmd .cmd-c { color: var(--mute); }
+  .testcmd .cmd-k { color: var(--hot); }
+  .testcmd .cmd-s { color: var(--acid); }
+  .testcmd .cmd-u { color: var(--cyan); }
+
+  /* Big completion block */
+  .completion {
+    margin-top: 90px;
+    background: linear-gradient(135deg, rgba(234,75,113,0.12), rgba(200,255,77,0.08));
+    border: 1px solid rgba(234,75,113,0.4);
+    border-radius: var(--r-lg);
+    padding: 50px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .completion::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+  .completion h3 {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.05;
+    color: var(--paper);
+  }
+  .completion h3 em { color: var(--hot); }
+  .completion p {
+    margin-top: 18px; color: var(--paper-dim);
+    font-size: 16px; line-height: 1.6;
+    max-width: 680px; margin-left: auto; margin-right: auto;
+  }
+  .completion .stats {
+    margin-top: 36px;
+    display: flex; justify-content: center;
+    gap: 50px; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 30px;
+  }
+  .completion .stat .num {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 54px; color: var(--hot); line-height: 1;
+  }
+  .completion .stat .lab {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--mute); margin-top: 6px;
+  }
+</style>
+
 <section id="first" class="container">
-  <span class="eyebrow">08 · Hands-on</span>
-  <h2 style="margin-top:24px; max-width: 1100px;">Let's build one: <em>"alert me on Slack when a paying lead signs up"</em>.</h2>
+  <span class="eyebrow">08 · Hands-on tutorial</span>
+  <h2 style="margin-top:24px; max-width: 1100px;">Let's build one together: <em>"alert me on Slack when a paying lead signs up"</em>.</h2>
 
   <div class="prose">
     <p>
-      Walk through this once and you'll have done every fundamental n8n move. Pretend you have a signup
-      form on your landing page that posts to a URL. We'll catch it, filter for high-value leads, enrich
-      them, ping Slack, and log them in a sheet. Five nodes, ~10 minutes the first time.
+      This is the most important section of the guide. Walk through it once — really do it,
+      don't just read — and you'll have done <strong>every fundamental move</strong> n8n offers.
+      Triggers, branching, calling APIs, sending messages, saving data. After this, every other
+      workflow you'll ever build is just a remix of these five moves.
     </p>
   </div>
 
-  <div class="steps">
-    <div class="step">
-      <div class="num"></div>
-      <div>
-        <h3>Add the trigger: Webhook</h3>
-        <div class="body">
-          <p>Click the big "+" on the empty canvas, search "Webhook", drop it in. n8n shows you
-          two URLs — a <strong>Test URL</strong> (only listens while you're testing) and a
-          <strong>Production URL</strong> (always listens once your workflow is "Active").</p>
-          <p>For now, copy the Test URL into your form's "submit to" setting (or use a tool like Postman / curl). Submit the form once. You should see data appear inside the node.</p>
-          <div class="tipline">PRO TIP — click "Listen for test event", then submit your form, and n8n captures the real request so you can build the rest of the workflow against real data.</div>
+  <!-- The blueprint upfront -->
+  <div class="fw-intro">
+    <div>
+      <h3>What we're building</h3>
+      <p>
+        Imagine you run a SaaS product. Your landing page has a "Sign up for Pro" form. When
+        someone fills it, three things should happen <em>instantly and automatically</em>:
+      </p>
+      <ol style="margin-top: 16px; padding-left: 20px; color: var(--paper-dim); font-size: 15px; line-height: 1.8;">
+        <li>Your sales team gets a Slack ping in <code class="inline">#sales-hot-leads</code> with the lead's info.</li>
+        <li>The lead's email + company gets enriched (so you know who they are before reaching out).</li>
+        <li>A row gets added to your master leads spreadsheet for tracking.</li>
+      </ol>
+      <p style="margin-top: 18px;">
+        That's it. Zero servers, zero code, ~10 minutes to build. Here's the final flow:
+      </p>
+      <div class="badge-stack">
+        <span class="hot">5 nodes</span>
+        <span>~10 min</span>
+        <span>free tier ok</span>
+        <span>copy-pasteable</span>
+      </div>
+    </div>
+    <div class="fw-finalflow">
+      <div class="fnode">
+        <div class="ix">⚡</div>
+        <div>
+          <div class="nm">Webhook</div>
+          <div class="ds">trigger · catches the form submission</div>
         </div>
       </div>
-      <div class="visual">
-        <div class="row"><span class="c">// node 1 · Webhook</span></div>
-        <div class="row"><span class="k">method</span> <span class="v">"POST"</span></div>
-        <div class="row"><span class="k">path</span> <span class="v">"/lead-form"</span></div>
-        <div class="row"><span class="k">response</span> <span class="v">"immediately"</span></div>
-        <div class="row"><span class="dot"></span><span class="c">listening · webhook-id 8e21...</span></div>
+      <div class="fnode">
+        <div class="ix">?</div>
+        <div>
+          <div class="nm">IF</div>
+          <div class="ds">logic · only continue if plan = "pro"</div>
+        </div>
+      </div>
+      <div class="fnode">
+        <div class="ix">⊕</div>
+        <div>
+          <div class="nm">HTTP Request</div>
+          <div class="ds">action · enrich with Clearbit</div>
+        </div>
+      </div>
+      <div class="fnode">
+        <div class="ix">@</div>
+        <div>
+          <div class="nm">Slack</div>
+          <div class="ds">action · post to #sales-hot-leads</div>
+        </div>
+      </div>
+      <div class="fnode">
+        <div class="ix">▤</div>
+        <div>
+          <div class="nm">Google Sheets</div>
+          <div class="ds">action · append row to leads_2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ STEP 1 ============================ -->
+  <div class="bigstep">
+    <div class="bigstep-head">
+      <div class="bignum">01</div>
+      <div>
+        <h3>Create a new workflow + drop in the <em>Webhook</em> trigger</h3>
+        <p class="step-intro">
+          We need a <b>door</b> for the form data to come in through. That door is called a Webhook — n8n gives you a public URL that, when anyone POSTs data to it, fires off your workflow.
+        </p>
       </div>
     </div>
 
-    <div class="step">
-      <div class="num"></div>
+    <div class="bigstep-body">
       <div>
-        <h3>Filter: only continue if plan = "pro"</h3>
-        <div class="body">
-          <p>Add an <strong>IF</strong> node. On the left side of the condition, click the
-          expression toggle, then drag the <code class="inline">plan</code> field from the
-          left panel onto the box. It auto-fills <code class="inline">{{ $json.body.plan }}</code>.</p>
-          <p>Operator: "equals". Right side: <code class="inline">pro</code>. Now the workflow
-          continues down the TRUE branch only when the plan is "pro". The FALSE branch can be left empty (the workflow just stops).</p>
-          <div class="tipline">PRO TIP — you can drag any field from the INPUT panel into any field. n8n writes the expression for you. No typing.</div>
+        <ol class="substeps">
+          <li>Open n8n. In the left sidebar, click <b>Workflows</b>, then the <kbd>+ Add workflow</kbd> button in the top-right.</li>
+          <li>You'll land on an empty checkered canvas with a single big <kbd>+</kbd> button in the middle. Click it.</li>
+          <li>A node-picker panel slides in from the right. In the search field, type <code>webhook</code>.</li>
+          <li>Click the first result: <b>Webhook</b> (the one with the lightning bolt icon). The picker closes and a Webhook node appears on your canvas.</li>
+          <li>The right-hand inspector opens automatically. Set <b>HTTP Method</b> = <code>POST</code> and <b>Path</b> = <code>lead-form</code> (you can pick any path name — it becomes part of the URL).</li>
+          <li>Leave <b>Respond</b> as <code>Immediately</code>. This means the workflow will respond "200 OK" instantly while the rest of the flow keeps processing.</li>
+          <li>At the top of the inspector, you'll see two URLs: <b>Test URL</b> and <b>Production URL</b>. Copy the <b>Test URL</b> to your clipboard.</li>
+          <li>Click the orange button: <kbd>Listen for test event</kbd>. The node will say "Waiting for webhook call..." — n8n is now actively listening on that URL.</li>
+          <li>Open your terminal (or use a tool like Postman) and send a test POST request — see the command below the screenshot.</li>
+          <li>Switch back to n8n: a green checkmark appears on the node, and the right-side <b>OUTPUT</b> panel fills with the JSON you just sent.</li>
+        </ol>
+
+        <div class="testcmd">
+<span class="cmd-c"># Paste this in your terminal — replace the URL with your Test URL</span>
+<span class="cmd-k">curl</span> -X POST <span class="cmd-u">https://your-n8n.io/webhook-test/lead-form</span> \
+  -H <span class="cmd-s">"Content-Type: application/json"</span> \
+  -d <span class="cmd-s">'{ "name": "Lucy Chen", "email": "lucy@acme.com", "plan": "pro" }'</span>
+        </div>
+
+        <div class="callout mistake">
+          <b>Common mistake:</b> using the <b>Production URL</b> while building. The Production URL only works when your workflow is set to "Active" in the top bar. While developing, always use the <b>Test URL</b> + click "Listen for test event" before sending requests. n8n will throw a confusing "webhook not registered" error otherwise.
+        </div>
+
+        <div class="callout tip">
+          <b>Why we do it this way:</b> by sending a real test request now, n8n captures the exact shape of the JSON your form will send. From this point on, all other nodes can "see" those fields (<code>name</code>, <code>email</code>, <code>plan</code>) and you can drag them into other fields. No guessing.
         </div>
       </div>
-      <div class="visual">
-        <div class="row"><span class="c">// node 2 · IF</span></div>
-        <div class="row"><span class="k">left</span> <span class="v">{{ $json.body.plan }}</span></div>
-        <div class="row"><span class="k">operator</span> <span class="v">"equals"</span></div>
-        <div class="row"><span class="k">right</span> <span class="v">"pro"</span></div>
-        <div class="row"><span class="c">true → continue  ·  false → stop</span></div>
+
+      <div>
+        <!-- Mock screenshot of the n8n editor with webhook node -->
+        <div class="screen">
+          <div class="screen-bar">
+            <div class="traffic"><span></span><span></span><span></span></div>
+            <div class="title">My workflow · unsaved</div>
+            <div class="active-toggle"><span>Inactive</span><div class="tg"></div></div>
+            <div class="exec-btn">▶ Execute</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-sidebar">
+              <h6>Workspace</h6>
+              <div class="sb-item active">📋 Editor</div>
+              <div class="sb-item">▶ Executions</div>
+              <div class="sb-item">⚿ Credentials</div>
+              <h6>Workflows</h6>
+              <div class="sb-item">★ Templates</div>
+              <div class="sb-item">⚙ Settings</div>
+            </div>
+            <div class="screen-canvas" style="min-height: 240px;">
+              <div class="scn trigger cur" style="top: 80px; left: 60px;">
+                <div class="scn-ico">⚡</div>
+                <div class="scn-name">Webhook</div>
+                <div class="scn-sub">POST /lead-form</div>
+                <div class="scn-handle"></div>
+              </div>
+            </div>
+          </div>
+          <div class="inspector">
+            <h6>⚡ Webhook · configuration</h6>
+            <div class="url-row">
+              <div class="url-lab">Test URL</div>
+              <div class="url-val">https://your-n8n.io/webhook-test/lead-form</div>
+            </div>
+            <div class="url-row">
+              <div class="url-lab">Production URL</div>
+              <div class="url-val" style="color:var(--mute)">https://your-n8n.io/webhook/lead-form</div>
+            </div>
+            <div class="field" style="margin-top: 12px;">
+              <div class="lab">HTTP Method</div>
+              <div class="val dropdown">POST</div>
+            </div>
+            <div class="field">
+              <div class="lab">Path</div>
+              <div class="val">lead-form</div>
+            </div>
+            <div class="field">
+              <div class="lab">Respond</div>
+              <div class="val dropdown">Immediately</div>
+            </div>
+            <div class="listening">Listening for test event · click submit on your form</div>
+          </div>
+        </div>
+
+        <div class="output-pane">
+          <div class="op-bar">
+            <div class="op-label">▼ Output · 1 item received</div>
+            <div class="op-tabs">
+              <span>Table</span>
+              <span class="on">JSON</span>
+              <span>Schema</span>
+            </div>
+          </div>
+<pre>{
+  <span class="k">"headers"</span>: { <span class="k">"content-type"</span>: <span class="s">"application/json"</span> },
+  <span class="k">"body"</span>: {
+    <span class="k">"name"</span>:  <span class="s">"Lucy Chen"</span>,
+    <span class="k">"email"</span>: <span class="s">"lucy@acme.com"</span>,
+    <span class="k">"plan"</span>:  <span class="s">"pro"</span>
+  },
+  <span class="k">"query"</span>: {},
+  <span class="k">"webhookUrl"</span>: <span class="s">"https://your-n8n.io/webhook/lead-form"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ STEP 2 ============================ -->
+  <div class="bigstep">
+    <div class="bigstep-head">
+      <div class="bignum">02</div>
+      <div>
+        <h3>Add an <em>IF</em> node to filter only Pro plan signups</h3>
+        <p class="step-intro">
+          Not every signup is a hot lead — only the ones who picked the Pro plan. The <b>IF</b> node has two outputs: a green <b>TRUE</b> branch (condition matched) and a red <b>FALSE</b> branch (condition didn't match). We'll only continue down TRUE.
+        </p>
       </div>
     </div>
 
-    <div class="step">
-      <div class="num"></div>
+    <div class="bigstep-body">
       <div>
-        <h3>Enrich: HTTP Request (look up the company)</h3>
-        <div class="body">
-          <p>Add an <strong>HTTP Request</strong> node from the TRUE output of IF. Method: GET.
-          URL: <code class="inline">https://person.clearbit.com/v2/people/find</code>.</p>
-          <p>Under "Query parameters", add <code class="inline">email = {{ $json.body.email }}</code>.
-          Under "Authentication", create a new credential of type "Header Auth" — paste your
-          Clearbit API key. Click test → you should see the enriched person object in the
-          OUTPUT panel: name, company, role, etc.</p>
-          <div class="tipline">PRO TIP — most APIs work with "Header Auth" or "Bearer Token". When in doubt, check the API's docs page and search for "authentication".</div>
+        <ol class="substeps">
+          <li>Hover over the Webhook node — a small <kbd>+</kbd> appears on its right edge. Click and drag from it onto empty canvas space. Drop. The node-picker opens.</li>
+          <li>Type <code>if</code> in the search. Click the <b>If</b> node (with the question mark icon).</li>
+          <li>A new IF node appears, automatically connected to the Webhook node. The inspector opens.</li>
+          <li>You'll see an empty <b>Conditions</b> section. Click <kbd>+ Add Condition</kbd>.</li>
+          <li>Pick condition type: <b>String</b>. We're comparing the plan field, which is text.</li>
+          <li>On the <b>Value 1</b> (left side) field, click the small <kbd>{ }</kbd> icon to switch to <b>Expression mode</b>. The field turns yellow-green.</li>
+          <li>Now look at the left side of the screen — there's an <b>INPUT</b> panel showing the JSON from the Webhook. Find the <code>body.plan</code> field and <b>drag it</b> right onto the Value 1 input. n8n writes <code>{{ $json.body.plan }}</code> for you.</li>
+          <li>For <b>Operation</b>, pick <code>is equal to</code> from the dropdown.</li>
+          <li>For <b>Value 2</b> (right side), leave it in Fixed mode and just type <code>pro</code>. No quotes needed.</li>
+          <li>Click <kbd>Execute previous nodes</kbd> at the top of the inspector to test. Look at the output — you should see the item in the <b>true</b> branch (since our test data has <code>plan: "pro"</code>).</li>
+        </ol>
+
+        <div class="callout tip">
+          <b>The drag-from-INPUT trick is the most important skill in n8n.</b> You almost never have to type expressions by hand — open the left INPUT panel, find the field you want, drag it into any input. n8n writes the correct expression every time. Memorize this move.
+        </div>
+
+        <div class="callout mistake">
+          <b>Common mistake:</b> typing the field name manually (like <code>$json.plan</code>) when the actual path is <code>$json.body.plan</code>. Why? Because the Webhook node wraps the request body inside a <code>body</code> field. Always check the OUTPUT panel of the previous node to see the real shape before typing paths.
         </div>
       </div>
-      <div class="visual">
-        <div class="row"><span class="c">// node 3 · HTTP Request</span></div>
-        <div class="row"><span class="k">method</span> <span class="v">"GET"</span></div>
-        <div class="row"><span class="k">url</span> <span class="v">"https://person.clearbit.com/v2/people/find"</span></div>
-        <div class="row"><span class="k">query.email</span> <span class="v">{{ $json.body.email }}</span></div>
-        <div class="row"><span class="k">auth</span> <span class="v">"clearbit-api-key"</span></div>
+
+      <div>
+        <div class="screen">
+          <div class="screen-bar">
+            <div class="traffic"><span></span><span></span><span></span></div>
+            <div class="title">My workflow · unsaved</div>
+            <div class="active-toggle"><span>Inactive</span><div class="tg"></div></div>
+            <div class="exec-btn">▶ Execute</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-sidebar">
+              <h6>Input · from Webhook</h6>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.8; color: var(--paper-dim);">
+                <div style="color:var(--hot);">body</div>
+                <div style="padding-left: 12px;">name <span style="color:var(--acid)">"Lucy"</span></div>
+                <div style="padding-left: 12px;">email <span style="color:var(--acid)">"lucy@..."</span></div>
+                <div style="padding-left: 12px; background: rgba(106,215,229,0.1); border-radius: 4px; padding: 2px 12px; color: var(--cyan);">plan <span style="color:var(--acid)">"pro"</span> ← drag this</div>
+                <div style="margin-top: 8px; color:var(--hot);">headers</div>
+                <div style="padding-left: 12px;">content-type</div>
+              </div>
+            </div>
+            <div class="screen-canvas" style="min-height: 220px;">
+              <div class="scn trigger lit" style="top: 80px; left: 30px;">
+                <div class="scn-ico">⚡</div>
+                <div class="scn-name">Webhook</div>
+                <div class="scn-sub">✓ executed</div>
+                <div class="scn-handle"></div>
+              </div>
+              <div class="scn-wire live" style="top: 102px; left: 165px; width: 70px;"></div>
+              <div class="scn logic cur" style="top: 80px; left: 240px;">
+                <div class="scn-ico">?</div>
+                <div class="scn-name">If</div>
+                <div class="scn-sub">plan = pro</div>
+                <div class="scn-handle" style="top: 30%;"></div>
+                <div class="scn-handle" style="top: 70%; background: var(--hot-2);"></div>
+              </div>
+            </div>
+          </div>
+          <div class="inspector">
+            <h6>? If · conditions</h6>
+            <div class="field">
+              <div class="lab">Combine</div>
+              <div class="val dropdown">AND</div>
+            </div>
+            <div style="margin-top: 14px; padding: 12px; background: var(--ink); border: 1px solid var(--line); border-radius: 6px;">
+              <div class="field" style="border-bottom: 0; padding: 4px 0;">
+                <div class="lab">Value 1</div>
+                <div class="val exp">{{ $json.body.plan }}</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 4px 0;">
+                <div class="lab">Operation</div>
+                <div class="val dropdown">is equal to</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 4px 0;">
+                <div class="lab">Value 2</div>
+                <div class="val">pro</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-pane">
+          <div class="op-bar">
+            <div class="op-label">▼ Output · true branch · 1 item</div>
+            <div class="op-tabs">
+              <span>Table</span>
+              <span class="on">JSON</span>
+              <span>Schema</span>
+            </div>
+          </div>
+<pre>{
+  <span class="c">// the item passed through — same JSON as input</span>
+  <span class="k">"body"</span>: {
+    <span class="k">"name"</span>:  <span class="s">"Lucy Chen"</span>,
+    <span class="k">"email"</span>: <span class="s">"lucy@acme.com"</span>,
+    <span class="k">"plan"</span>:  <span class="s">"pro"</span>  <span class="c">// ← matched!</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ STEP 3 ============================ -->
+  <div class="bigstep">
+    <div class="bigstep-head">
+      <div class="bignum">03</div>
+      <div>
+        <h3>Enrich the lead with an <em>HTTP Request</em> to Clearbit</h3>
+        <p class="step-intro">
+          Right now we only know the lead's name and email. Let's call <a href="https://clearbit.com" style="color:var(--cyan); border-bottom: 1px dashed;">Clearbit's</a> API to get their company, role, LinkedIn, etc. There's no dedicated Clearbit node, so we use the universal <b>HTTP Request</b> node — the master key for any API on the internet.
+        </p>
       </div>
     </div>
 
-    <div class="step">
-      <div class="num"></div>
+    <div class="bigstep-body">
       <div>
-        <h3>Notify: Slack message</h3>
-        <div class="body">
-          <p>Add a <strong>Slack</strong> node. The first time, click "Create new credential"
-          → either OAuth (click "Sign in with Slack" and approve), or paste a Bot Token from your Slack app.</p>
-          <p>Operation: "Send a message". Channel: <code class="inline">#sales-hot-leads</code>.
-          Text: <code class="inline">🔥 New Pro lead — {{ $json.name }} from {{ $json.company.name }} ({{ $json.role }})</code>.</p>
-          <p>Click "Execute node" once to test. A real message appears in your Slack channel. If it doesn't, check the OUTPUT panel — the error message will tell you what's wrong (usually: wrong channel name, or the bot isn't invited to that channel).</p>
+        <ol class="substeps">
+          <li>From the <b>true</b> output of the IF node (top exit point), drag a connection onto empty canvas.</li>
+          <li>Search <code>http request</code> in the picker. Click the <b>HTTP Request</b> node.</li>
+          <li>In the inspector, set <b>Method</b> = <code>GET</code>.</li>
+          <li>For <b>URL</b>, paste: <code>https://person.clearbit.com/v2/people/find</code></li>
+          <li>Scroll down to <b>Authentication</b>. Set it to <code>Generic Credential Type</code>, then <code>Header Auth</code>.</li>
+          <li>Click <kbd>+ Create New Credential</kbd>. A modal opens. <b>Name</b> = <code>Authorization</code>, <b>Value</b> = <code>Bearer your-clearbit-api-key</code>. Click <kbd>Save</kbd>. The modal closes — your credential is now stored encrypted.</li>
+          <li>Back in the main inspector, find <b>Send Query Parameters</b> and toggle it <code>ON</code>.</li>
+          <li>Click <kbd>+ Add Parameter</kbd>. <b>Name</b> = <code>email</code>. For <b>Value</b>, click the <kbd>{ }</kbd> to switch to Expression mode, then drag <code>body.email</code> from the INPUT panel on the left.</li>
+          <li>Click <kbd>Execute node</kbd> (top-right of inspector). After ~1 second, the OUTPUT panel fills with enriched data: full name, company, role, LinkedIn URL, etc.</li>
+        </ol>
+
+        <div class="callout tip">
+          <b>Generic Credential Type</b> is your friend for any API n8n doesn't have a dedicated node for. The most common types are:
+          <br><br>
+          <b>Header Auth</b> — the API expects a header like <code>Authorization: Bearer xyz</code>. <br>
+          <b>Query Auth</b> — the API expects <code>?api_key=xyz</code> in the URL. <br>
+          <b>Basic Auth</b> — old-school username + password. <br><br>
+          Check the API's docs (every API has an "Authentication" section). Match the type, paste your key, you're in.
+        </div>
+
+        <div class="callout mistake">
+          <b>Common mistake:</b> pasting the raw API key without the word <code>Bearer</code>. Most modern APIs require the value to be literally <code>Bearer sk_live_abc123...</code> (with the word "Bearer" + space + the key). If you get a 401 Unauthorized error, this is the first thing to check.
         </div>
       </div>
-      <div class="visual">
-        <div class="row"><span class="c">// node 4 · Slack</span></div>
-        <div class="row"><span class="k">operation</span> <span class="v">"sendMessage"</span></div>
-        <div class="row"><span class="k">channel</span> <span class="v">"#sales-hot-leads"</span></div>
-        <div class="row"><span class="k">text</span> <span class="v">"🔥 {{ $json.name }} · {{ $json.company.name }}"</span></div>
-        <div class="row"><span class="dot" style="background:var(--acid)"></span><span class="c">message_ts 1716...</span></div>
+
+      <div>
+        <div class="screen">
+          <div class="screen-bar">
+            <div class="traffic"><span></span><span></span><span></span></div>
+            <div class="title">My workflow · unsaved</div>
+            <div class="active-toggle"><span>Inactive</span><div class="tg"></div></div>
+            <div class="exec-btn">▶ Execute</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-sidebar">
+              <h6>Input · from If (true)</h6>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.8; color: var(--paper-dim);">
+                <div style="color:var(--hot);">body</div>
+                <div style="padding-left: 12px;">name</div>
+                <div style="padding-left: 12px; background: rgba(106,215,229,0.1); border-radius: 4px; padding: 2px 12px; color: var(--cyan);">email ← drag</div>
+                <div style="padding-left: 12px;">plan</div>
+              </div>
+            </div>
+            <div class="screen-canvas" style="min-height: 220px;">
+              <div class="scn trigger lit" style="top: 80px; left: 14px;">
+                <div class="scn-ico">⚡</div>
+                <div class="scn-name">Webhook</div>
+                <div class="scn-sub">✓</div>
+              </div>
+              <div class="scn-wire live" style="top: 102px; left: 148px; width: 32px;"></div>
+              <div class="scn logic lit" style="top: 80px; left: 184px;">
+                <div class="scn-ico">?</div>
+                <div class="scn-name">If</div>
+                <div class="scn-sub">✓ true</div>
+              </div>
+              <div class="scn-wire live" style="top: 92px; left: 318px; width: 32px;"></div>
+              <div class="scn action cur" style="top: 70px; left: 354px;">
+                <div class="scn-ico">⊕</div>
+                <div class="scn-name">HTTP Request</div>
+                <div class="scn-sub">clearbit</div>
+              </div>
+            </div>
+          </div>
+          <div class="inspector">
+            <h6>⊕ HTTP Request · configuration</h6>
+            <div class="field">
+              <div class="lab">Method</div>
+              <div class="val dropdown">GET</div>
+            </div>
+            <div class="field">
+              <div class="lab">URL</div>
+              <div class="val">https://person.clearbit.com/v2/people/find</div>
+            </div>
+            <div class="field">
+              <div class="lab">Authentication</div>
+              <div class="val dropdown">Header Auth · clearbit-key</div>
+            </div>
+            <div class="field">
+              <div class="lab">Send Query Params</div>
+              <div class="val checked">enabled</div>
+            </div>
+            <div style="margin: 8px 0 0 130px; padding: 10px 14px; background: var(--ink); border: 1px solid var(--line); border-radius: 6px;">
+              <div class="field" style="border-bottom: 0; padding: 4px 0;">
+                <div class="lab">name</div>
+                <div class="val">email</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 4px 0;">
+                <div class="lab">value</div>
+                <div class="val exp">{{ $json.body.email }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-pane">
+          <div class="op-bar">
+            <div class="op-label">▼ Output · enriched person · 1 item</div>
+            <div class="op-tabs">
+              <span>Table</span>
+              <span class="on">JSON</span>
+              <span>Schema</span>
+            </div>
+          </div>
+<pre>{
+  <span class="k">"id"</span>: <span class="s">"d54c54ad-..."</span>,
+  <span class="k">"name"</span>: { <span class="k">"fullName"</span>: <span class="s">"Lucy Chen"</span> },
+  <span class="k">"email"</span>: <span class="s">"lucy@acme.com"</span>,
+  <span class="k">"employment"</span>: {
+    <span class="k">"name"</span>:  <span class="s">"Acme Corp"</span>,
+    <span class="k">"title"</span>: <span class="s">"Head of Product"</span>,
+    <span class="k">"role"</span>:  <span class="s">"product"</span>
+  },
+  <span class="k">"linkedin"</span>: { <span class="k">"handle"</span>: <span class="s">"in/lucychen"</span> },
+  <span class="k">"location"</span>: <span class="s">"San Francisco, CA, USA"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ STEP 4 ============================ -->
+  <div class="bigstep">
+    <div class="bigstep-head">
+      <div class="bignum">04</div>
+      <div>
+        <h3>Send a <em>Slack</em> message to your sales team</h3>
+        <p class="step-intro">
+          Now the fun part — broadcasting this to humans. We'll use the <b>Slack</b> node to post a rich message to <code>#sales-hot-leads</code> with all the enriched data we just fetched.
+        </p>
       </div>
     </div>
 
-    <div class="step">
-      <div class="num"></div>
+    <div class="bigstep-body">
       <div>
-        <h3>Persist: append a row to Google Sheets</h3>
-        <div class="body">
-          <p>Add a <strong>Google Sheets</strong> node in parallel (drag from the same Slack
-          node's input, or branch from earlier). Sign in with Google. Pick the spreadsheet,
-          the sheet/tab, operation "Append".</p>
-          <p>n8n reads your sheet's column headers automatically. You drag fields from the
-          left into each column. Done.</p>
-          <p>Now <strong>save the workflow</strong> (top-right), give it a name, and flip the
-          <strong>Active</strong> toggle in the top bar. The workflow is now live — every
-          form submission will trigger this whole chain automatically.</p>
-          <div class="tipline">🎉 CONGRATS — you just built an automation. Refresh the page; go to "Executions"; you'll see your test run logged with every node's input/output preserved.</div>
+        <ol class="substeps">
+          <li>From the HTTP Request node's output, drag a connection onto empty canvas. Search <code>slack</code>.</li>
+          <li>Click the <b>Slack</b> node (not the "Trigger" variant — we want the action one).</li>
+          <li>In the inspector, the first thing is the <b>Credential</b> dropdown — it's empty. Click <kbd>+ Create new credential</kbd>.</li>
+          <li>A modal opens. Pick <b>Slack OAuth2 API</b> (easiest path — no Bot Token wrangling needed).</li>
+          <li>Click <kbd>Sign in with Slack</kbd>. A popup opens — pick your workspace, approve the permissions ("post to channels", "read user info"). The popup closes and your credential is saved.</li>
+          <li>Back in the main inspector: <b>Resource</b> = <code>Message</code>, <b>Operation</b> = <code>Send</code>.</li>
+          <li>For <b>Send Message To</b>, pick <code>Channel</code>. For <b>Channel</b>, start typing — n8n shows your real Slack channels in a dropdown. Pick <code>#sales-hot-leads</code> (create it in Slack first if it doesn't exist).</li>
+          <li>For <b>Message Text</b>, switch to Expression mode and paste this:</li>
+        </ol>
+
+        <div class="testcmd" style="margin-top: 16px;">
+<span class="cmd-c"># Slack message template — drag-and-drop friendly</span>
+🔥 New <span class="cmd-k">Pro</span> signup!
+
+*Name:* {{ $json.name.fullName }}
+*Email:* {{ $json.email }}
+*Company:* {{ $json.employment.name }}
+*Role:* {{ $json.employment.title }}
+*Location:* {{ $json.location }}
+*LinkedIn:* https://linkedin.com/{{ $json.linkedin.handle }}
+        </div>
+
+        <ol class="substeps" start="9" style="counter-reset: sub 8;">
+          <li>Click <kbd>Execute node</kbd>. After a second, the OUTPUT panel shows a success object with the message ID. <b>Switch to Slack</b> — your message is live in the channel.</li>
+        </ol>
+
+        <div class="callout success">
+          <b>Big moment:</b> right here is where most people fall in love with n8n. You just connected a webhook to a third-party API to your team's chat tool, with zero code, in about 6 minutes total.
+        </div>
+
+        <div class="callout mistake">
+          <b>Common mistake:</b> "channel_not_found" error. This means the Slack bot doesn't have access to that channel. Fix: in Slack, go to the channel → Settings → Integrations → Add app → search "n8n" → add it. Or just use a public channel where the bot is already invited.
         </div>
       </div>
-      <div class="visual">
-        <div class="row"><span class="c">// node 5 · Google Sheets</span></div>
-        <div class="row"><span class="k">operation</span> <span class="v">"appendRow"</span></div>
-        <div class="row"><span class="k">sheet</span> <span class="v">"leads_2026"</span></div>
-        <div class="row"><span class="k">columns</span> <span class="v">{ email, name, company, plan }</span></div>
-        <div class="row"><span class="dot" style="background:var(--acid)"></span><span class="c">execution complete · 124ms</span></div>
+
+      <div>
+        <div class="screen">
+          <div class="screen-bar">
+            <div class="traffic"><span></span><span></span><span></span></div>
+            <div class="title">My workflow · unsaved</div>
+            <div class="active-toggle"><span>Inactive</span><div class="tg"></div></div>
+            <div class="exec-btn">▶ Execute</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-sidebar">
+              <h6>Credentials</h6>
+              <div class="sb-item"><span class="dt"></span>clearbit-key</div>
+              <div class="sb-item active"><span class="dt" style="background: var(--violet);"></span>Slack OAuth2 · acme</div>
+              <h6>Connected as</h6>
+              <div style="font-size: 11px; color: var(--paper-dim); line-height: 1.6; font-family:'JetBrains Mono',monospace; padding: 0 10px;">
+                Acme Corp<br>
+                #sales-hot-leads<br>
+                <span style="color: var(--acid);">● bot installed</span>
+              </div>
+            </div>
+            <div class="screen-canvas" style="min-height: 220px;">
+              <div class="scn trigger lit" style="top: 80px; left: 6px; width: 90px;">
+                <div class="scn-ico">⚡</div>
+                <div class="scn-name" style="font-size: 11px;">Webhook</div>
+              </div>
+              <div class="scn-wire live" style="top: 102px; left: 102px; width: 22px;"></div>
+              <div class="scn logic lit" style="top: 80px; left: 128px; width: 80px;">
+                <div class="scn-ico">?</div>
+                <div class="scn-name" style="font-size: 11px;">If</div>
+              </div>
+              <div class="scn-wire live" style="top: 92px; left: 212px; width: 22px;"></div>
+              <div class="scn action lit" style="top: 70px; left: 238px; width: 105px;">
+                <div class="scn-ico">⊕</div>
+                <div class="scn-name" style="font-size: 11px;">HTTP</div>
+              </div>
+              <div class="scn-wire live" style="top: 92px; left: 347px; width: 22px;"></div>
+              <div class="scn notify cur" style="top: 70px; left: 372px; width: 100px;">
+                <div class="scn-ico">@</div>
+                <div class="scn-name" style="font-size: 11px;">Slack</div>
+                <div class="scn-sub">#sales-hot...</div>
+              </div>
+            </div>
+          </div>
+          <div class="inspector">
+            <h6>@ Slack · send message</h6>
+            <div class="field">
+              <div class="lab">Credential</div>
+              <div class="val dropdown">Slack OAuth2 · acme</div>
+            </div>
+            <div class="field">
+              <div class="lab">Resource</div>
+              <div class="val dropdown">Message</div>
+            </div>
+            <div class="field">
+              <div class="lab">Operation</div>
+              <div class="val dropdown">Send</div>
+            </div>
+            <div class="field">
+              <div class="lab">Send To</div>
+              <div class="val dropdown">Channel</div>
+            </div>
+            <div class="field">
+              <div class="lab">Channel</div>
+              <div class="val dropdown">#sales-hot-leads</div>
+            </div>
+            <div class="field" style="align-items: flex-start;">
+              <div class="lab">Message Text</div>
+              <div class="val exp" style="white-space: pre-line; font-size: 11.5px; line-height: 1.6;">🔥 New Pro signup!&#10;*Name:* {{ $json.name.fullName }}&#10;*Email:* {{ $json.email }}&#10;*Company:* {{ $json.employment.name }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-pane">
+          <div class="op-bar">
+            <div class="op-label">▼ Slack response · message posted</div>
+            <div class="op-tabs"><span>Table</span><span class="on">JSON</span><span>Schema</span></div>
+          </div>
+<pre>{
+  <span class="k">"ok"</span>: <span class="b">true</span>,
+  <span class="k">"channel"</span>: <span class="s">"C06H7K3N9"</span>,
+  <span class="k">"ts"</span>: <span class="s">"1716543210.0001"</span>,
+  <span class="k">"message"</span>: {
+    <span class="k">"text"</span>: <span class="s">"🔥 New Pro signup!..."</span>,
+    <span class="k">"user"</span>: <span class="s">"U7N8N_BOT"</span>,
+    <span class="k">"team"</span>: <span class="s">"T01ACME"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ STEP 5 ============================ -->
+  <div class="bigstep">
+    <div class="bigstep-head">
+      <div class="bignum">05</div>
+      <div>
+        <h3>Save it forever — append a row to <em>Google Sheets</em></h3>
+        <p class="step-intro">
+          Slack messages scroll away. We want a permanent record. The <b>Google Sheets</b> node lets us add a row to a spreadsheet every time this fires — perfect for tracking, dashboards, and the sales team's pipeline review.
+        </p>
+      </div>
+    </div>
+
+    <div class="bigstep-body">
+      <div>
+        <ol class="substeps">
+          <li>Before opening n8n: in Google Sheets, create a new spreadsheet called <code>leads_2026</code>. In row 1, add column headers: <code>timestamp</code> · <code>name</code> · <code>email</code> · <code>company</code> · <code>title</code> · <code>plan</code>.</li>
+          <li>Back in n8n: from the Slack node's output, drag a new connection onto canvas. Search <code>google sheets</code>.</li>
+          <li>Click <b>Google Sheets</b> (the action node, not the trigger).</li>
+          <li>In the credential dropdown, click <kbd>+ Create new credential</kbd>. Choose <b>Google Sheets OAuth2 API</b>. Click <kbd>Sign in with Google</kbd> → approve. Done.</li>
+          <li>For <b>Resource</b>, pick <code>Sheet Within Document</code>. For <b>Operation</b>, pick <code>Append Row</code>.</li>
+          <li>For <b>Document</b>, the dropdown loads all your Google Sheets — pick <code>leads_2026</code>. For <b>Sheet</b>, pick <code>Sheet1</code> (or whatever tab name).</li>
+          <li>For <b>Mapping Column Mode</b>, pick <code>Map Each Column Manually</code>. n8n reads your headers and shows each one as a field to fill.</li>
+          <li>Now the magic — for each column, drag the matching field from the INPUT panel:
+            <ul style="margin-top: 8px; padding-left: 20px; color: var(--paper-dim); font-size: 13.5px; line-height: 1.8;">
+              <li><b>timestamp</b> → expression: <code>{{ $now.toISO() }}</code></li>
+              <li><b>name</b> → drag <code>name.fullName</code></li>
+              <li><b>email</b> → drag <code>email</code></li>
+              <li><b>company</b> → drag <code>employment.name</code></li>
+              <li><b>title</b> → drag <code>employment.title</code></li>
+              <li><b>plan</b> → expression: <code>pro</code> (literal text)</li>
+            </ul>
+          </li>
+          <li>Click <kbd>Execute node</kbd>. Open your Google Sheet in a separate tab — a new row appears at the bottom with all the data filled in.</li>
+          <li><b>Save the workflow:</b> click the workflow name (top-left) and rename it to <code>Hot Lead Alert</code>. Press <kbd>Ctrl+S</kbd> (or <kbd>Cmd+S</kbd>).</li>
+          <li><b>Activate it:</b> flip the <b>Inactive → Active</b> toggle in the top-right. The workflow is now LIVE in production. From this moment on, every real form submission will fire the entire chain automatically.</li>
+        </ol>
+
+        <div class="callout success">
+          <b>You're done.</b> The workflow is running 24/7. Every Pro signup → enriched → Slack ping → row in your sheet. All in real-time, all without you touching it. <b>Go to the Executions tab</b> in the left sidebar to see every run logged with full input/output per node.
+        </div>
+
+        <div class="callout tip">
+          <b>To test it for real now:</b> use the <b>Production URL</b> (not the Test URL) from your Webhook node. Send a POST request to it from your terminal — the workflow runs end-to-end, message lands in Slack, row appears in your sheet. Welcome to automation.
+        </div>
+      </div>
+
+      <div>
+        <div class="screen">
+          <div class="screen-bar">
+            <div class="traffic"><span></span><span></span><span></span></div>
+            <div class="title">Hot Lead Alert · saved · ACTIVE</div>
+            <div class="active-toggle on"><span style="color:var(--acid);">Active</span><div class="tg"></div></div>
+            <div class="exec-btn">▶ Execute</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-sidebar">
+              <h6>Sheet mapping</h6>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; line-height: 1.8; color: var(--paper-dim);">
+                <div style="color: var(--acid);">timestamp</div>
+                <div style="color: var(--acid);">name</div>
+                <div style="color: var(--acid);">email</div>
+                <div style="color: var(--acid);">company</div>
+                <div style="color: var(--acid);">title</div>
+                <div style="color: var(--acid);">plan</div>
+              </div>
+              <h6>Auto-detected</h6>
+              <div style="font-size: 10.5px; color: var(--mute); padding: 0 10px;">
+                6 columns from row 1 of <span style="color:var(--paper)">leads_2026</span>
+              </div>
+            </div>
+            <div class="screen-canvas" style="min-height: 220px;">
+              <div class="scn trigger lit" style="top: 80px; left: 6px; width: 78px;">
+                <div class="scn-ico">⚡</div>
+                <div class="scn-name" style="font-size: 10.5px;">Webhook</div>
+              </div>
+              <div class="scn-wire live" style="top: 102px; left: 90px; width: 16px;"></div>
+              <div class="scn logic lit" style="top: 80px; left: 110px; width: 60px;">
+                <div class="scn-ico">?</div>
+                <div class="scn-name" style="font-size: 10.5px;">If</div>
+              </div>
+              <div class="scn-wire live" style="top: 92px; left: 174px; width: 16px;"></div>
+              <div class="scn action lit" style="top: 70px; left: 194px; width: 78px;">
+                <div class="scn-ico">⊕</div>
+                <div class="scn-name" style="font-size: 10.5px;">HTTP</div>
+              </div>
+              <div class="scn-wire live" style="top: 92px; left: 276px; width: 16px;"></div>
+              <div class="scn notify lit" style="top: 70px; left: 296px; width: 76px;">
+                <div class="scn-ico">@</div>
+                <div class="scn-name" style="font-size: 10.5px;">Slack</div>
+              </div>
+              <div class="scn-wire live" style="top: 92px; left: 376px; width: 16px;"></div>
+              <div class="scn sheet cur" style="top: 70px; left: 396px; width: 95px;">
+                <div class="scn-ico">▤</div>
+                <div class="scn-name" style="font-size: 10.5px;">Sheets</div>
+                <div class="scn-sub">append</div>
+              </div>
+            </div>
+          </div>
+          <div class="inspector">
+            <h6>▤ Google Sheets · append row</h6>
+            <div class="field">
+              <div class="lab">Document</div>
+              <div class="val dropdown">leads_2026</div>
+            </div>
+            <div class="field">
+              <div class="lab">Sheet</div>
+              <div class="val dropdown">Sheet1</div>
+            </div>
+            <div class="field">
+              <div class="lab">Mapping</div>
+              <div class="val dropdown">Map Each Column Manually</div>
+            </div>
+            <div style="margin: 10px 0 0 130px; padding: 10px 14px; background: var(--ink); border: 1px solid var(--line); border-radius: 6px;">
+              <div class="field" style="border-bottom: 0; padding: 3px 0;">
+                <div class="lab">timestamp</div><div class="val exp">{{ $now.toISO() }}</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 3px 0;">
+                <div class="lab">name</div><div class="val exp">{{ $json.name.fullName }}</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 3px 0;">
+                <div class="lab">email</div><div class="val exp">{{ $json.email }}</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 3px 0;">
+                <div class="lab">company</div><div class="val exp">{{ $json.employment.name }}</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 3px 0;">
+                <div class="lab">plan</div><div class="val">pro</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-pane">
+          <div class="op-bar">
+            <div class="op-label">▼ Row appended · 1 item</div>
+            <div class="op-tabs"><span>Table</span><span class="on">JSON</span><span>Schema</span></div>
+          </div>
+<pre>{
+  <span class="k">"row"</span>: <span class="n">47</span>,
+  <span class="k">"timestamp"</span>: <span class="s">"2026-05-29T14:23:01.234Z"</span>,
+  <span class="k">"name"</span>:      <span class="s">"Lucy Chen"</span>,
+  <span class="k">"email"</span>:     <span class="s">"lucy@acme.com"</span>,
+  <span class="k">"company"</span>:   <span class="s">"Acme Corp"</span>,
+  <span class="k">"title"</span>:     <span class="s">"Head of Product"</span>,
+  <span class="k">"plan"</span>:      <span class="s">"pro"</span>
+}
+
+<span class="c">// ✓ workflow saved as "Hot Lead Alert"</span>
+<span class="c">// ✓ status: ACTIVE — running in production</span>
+<span class="c">// ✓ next: every form POST will trigger this whole chain</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ COMPLETION ============================ -->
+  <div class="completion">
+    <h3>🎉 You just built a <em>production automation</em>.</h3>
+    <p>
+      Without writing a single line of real code. The workflow is now running 24/7 — every form
+      submission will trigger the entire chain in under 2 seconds, every time, forever. Go to the
+      <b>Executions tab</b> in the left sidebar and you'll see every run logged with input/output
+      per node, ready to inspect if anything ever goes wrong.
+    </p>
+    <p style="margin-top: 18px; font-family: 'Fraunces', serif; font-style: italic; color: var(--paper);">
+      Every other automation in this guide — and in the world — is just a remix of the five moves
+      you just made.
+    </p>
+    <div class="stats">
+      <div class="stat">
+        <div class="num">5</div>
+        <div class="lab">nodes built</div>
+      </div>
+      <div class="stat">
+        <div class="num">~10</div>
+        <div class="lab">minutes spent</div>
+      </div>
+      <div class="stat">
+        <div class="num">0</div>
+        <div class="lab">lines of code</div>
+      </div>
+      <div class="stat">
+        <div class="num">∞</div>
+        <div class="lab">runs from now on</div>
       </div>
     </div>
   </div>
