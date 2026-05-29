@@ -832,26 +832,26 @@
 
   /* tips */
   .tips { margin-top: 50px; display: grid; gap: 0; }
-  .tip {
+  .tips .tip {
     display: grid; grid-template-columns: 80px 1fr;
     padding: 24px 0;
     border-top: 1px solid var(--line);
     align-items: start; gap: 24px;
   }
-  .tip:last-child { border-bottom: 1px solid var(--line); }
-  .tip .kind {
+  .tips .tip:last-child { border-bottom: 1px solid var(--line); }
+  .tips .tip .kind {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px; letter-spacing: .14em;
     text-transform: uppercase;
     padding: 4px 8px; border-radius: 4px;
     display: inline-block; height: fit-content; width: fit-content;
   }
-  .tip.do  .kind { background: rgba(200,255,77,0.18); color: var(--acid); }
-  .tip.dont .kind { background: rgba(234,75,113,0.18); color: var(--hot-2); }
-  .tip.wow  .kind { background: rgba(106,215,229,0.18); color: var(--cyan); }
-  .tip h4 { font-family: 'Manrope'; font-weight: 600; font-size: 17px; }
-  .tip p { color: var(--paper-dim); margin-top: 6px; font-size: 14.5px; line-height: 1.55; }
-  .tip code {
+  .tips .tip.do  .kind { background: rgba(200,255,77,0.18); color: var(--acid); }
+  .tips .tip.dont .kind { background: rgba(234,75,113,0.18); color: var(--hot-2); }
+  .tips .tip.wow  .kind { background: rgba(106,215,229,0.18); color: var(--cyan); }
+  .tips .tip h4 { font-family: 'Manrope'; font-weight: 600; font-size: 17px; }
+  .tips .tip p { color: var(--paper-dim); margin-top: 6px; font-size: 14.5px; line-height: 1.55; }
+  .tips .tip code {
     font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
     background: var(--ink-2); border: 1px solid var(--line);
     padding: 2px 6px; border-radius: 4px; color: var(--acid);
