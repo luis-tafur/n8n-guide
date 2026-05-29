@@ -1507,36 +1507,45 @@
   .fw-finalflow .fnode:nth-child(5) .ix { background: var(--acid); }
 
   .bigstep {
-    margin-top: 80px;
-    padding-top: 60px;
+    margin-top: 70px;
+    padding-top: 50px;
     border-top: 1px solid var(--line);
   }
-  .bigstep:first-of-type { border-top: 0; padding-top: 30px; margin-top: 40px; }
+  .bigstep:first-of-type { border-top: 0; padding-top: 30px; margin-top: 50px; }
 
   .bigstep-head {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 30px;
-    align-items: baseline;
-    margin-bottom: 40px;
+    margin-bottom: 36px;
+    max-width: 920px;
   }
-  .bigstep-head .bignum {
-    font-family: 'Fraunces', serif; font-style: italic;
-    font-size: 110px; line-height: 0.9;
+  .bigstep-head .step-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
     color: var(--hot);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .bigstep-head .step-label::before {
+    content: ""; width: 36px; height: 1px; background: var(--hot);
   }
   .bigstep-head h3 {
     font-family: 'Fraunces', serif;
-    font-size: clamp(30px, 4vw, 48px);
-    line-height: 1.05;
+    font-size: clamp(28px, 3.4vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
   }
   .bigstep-head h3 em { color: var(--hot); font-style: italic; }
-  .bigstep-head .step-intro { color: var(--paper-dim); font-size: 16px; margin-top: 14px; max-width: 720px; line-height: 1.6; }
-  .bigstep-head .step-intro b { color: var(--paper); font-weight: 600; }
-  @media (max-width: 800px) {
-    .bigstep-head { grid-template-columns: 1fr; gap: 8px; }
-    .bigstep-head .bignum { font-size: 64px; }
+  .bigstep-head .step-intro {
+    color: var(--paper-dim);
+    font-size: 15.5px;
+    margin-top: 16px;
+    max-width: 720px;
+    line-height: 1.65;
   }
+  .bigstep-head .step-intro b { color: var(--paper); font-weight: 600; }
 
   .bigstep-body {
     display: grid;
@@ -1553,47 +1562,84 @@
   }
   .substeps li {
     counter-increment: sub;
-    display: grid;
-    grid-template-columns: 34px 1fr;
-    gap: 14px;
-    padding: 12px 0;
+    position: relative;
+    padding: 14px 0 14px 46px;
     border-bottom: 1px solid var(--line);
     color: var(--paper-dim);
     font-size: 14.5px;
-    line-height: 1.55;
+    line-height: 1.7;
   }
   .substeps li:last-child { border-bottom: 0; }
   .substeps li::before {
     content: counter(sub);
+    position: absolute;
+    left: 0;
+    top: 15px;
     font-family: 'JetBrains Mono', monospace;
     color: var(--hot);
     background: rgba(234,75,113,0.1);
-    border: 1px solid rgba(234,75,113,0.3);
+    border: 1px solid rgba(234,75,113,0.28);
     border-radius: 6px;
-    width: 26px; height: 26px;
+    width: 28px; height: 24px;
     display: grid; place-items: center;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
+    letter-spacing: 0;
   }
-  .substeps li b { color: var(--paper); font-weight: 600; }
+  .substeps li b {
+    color: var(--paper);
+    font-weight: 600;
+    display: inline;
+  }
   .substeps li kbd {
     font-family: 'JetBrains Mono', monospace;
     background: var(--ink-3);
     border: 1px solid var(--line-2);
     border-bottom-width: 2px;
     color: var(--paper);
-    padding: 1px 7px;
+    padding: 2px 8px;
     border-radius: 4px;
-    font-size: 11.5px;
+    font-size: 12px;
+    display: inline-block;
+    vertical-align: baseline;
+    line-height: 1.3;
+    white-space: nowrap;
   }
   .substeps li code {
     font-family: 'JetBrains Mono', monospace;
     color: var(--acid);
     background: var(--ink-2);
     border: 1px solid var(--line);
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 4px;
     font-size: 12.5px;
+    display: inline;
+    white-space: nowrap;
+  }
+  .substeps li a {
+    color: var(--cyan);
+    border-bottom: 1px dashed var(--line-2);
+  }
+  .substeps li ul {
+    margin: 10px 0 4px;
+    padding: 0;
+    list-style: none;
+  }
+  .substeps li ul li {
+    border-bottom: 0;
+    padding: 4px 0 4px 18px;
+    position: relative;
+    font-size: 13.5px;
+  }
+  .substeps li ul li::before {
+    content: "→";
+    position: absolute;
+    left: 0; top: 4px;
+    background: none;
+    border: none;
+    color: var(--hot);
+    width: auto; height: auto;
+    font-size: 12px;
   }
 
   /* The "screenshot" mockup */
@@ -2035,13 +2081,11 @@
   <!-- ============================ STEP 1 ============================ -->
   <div class="bigstep">
     <div class="bigstep-head">
-      <div class="bignum">01</div>
-      <div>
-        <h3>Create a new workflow + drop in the <em>Webhook</em> trigger</h3>
-        <p class="step-intro">
-          We need a <b>door</b> for the form data to come in through. That door is called a Webhook — n8n gives you a public URL that, when anyone POSTs data to it, fires off your workflow.
-        </p>
-      </div>
+      <span class="step-label">Step 01 — Trigger</span>
+      <h3>Create a new workflow and drop in the <em>Webhook</em> trigger</h3>
+      <p class="step-intro">
+        We need a <b>door</b> for the form data to come in through. That door is called a Webhook — n8n gives you a public URL that, when anyone POSTs data to it, fires off your workflow.
+      </p>
     </div>
 
     <div class="bigstep-body">
@@ -2156,13 +2200,11 @@
   <!-- ============================ STEP 2 ============================ -->
   <div class="bigstep">
     <div class="bigstep-head">
-      <div class="bignum">02</div>
-      <div>
-        <h3>Add an <em>IF</em> node to filter only Pro plan signups</h3>
-        <p class="step-intro">
-          Not every signup is a hot lead — only the ones who picked the Pro plan. The <b>IF</b> node has two outputs: a green <b>TRUE</b> branch (condition matched) and a red <b>FALSE</b> branch (condition didn't match). We'll only continue down TRUE.
-        </p>
-      </div>
+      <span class="step-label">Step 02 — Logic</span>
+      <h3>Add an <em>IF</em> node to filter only Pro plan signups</h3>
+      <p class="step-intro">
+        Not every signup is a hot lead — only the ones who picked the Pro plan. The <b>IF</b> node has two outputs: a green <b>TRUE</b> branch (condition matched) and a red <b>FALSE</b> branch (condition didn't match). We'll only continue down TRUE.
+      </p>
     </div>
 
     <div class="bigstep-body">
@@ -2274,13 +2316,11 @@
   <!-- ============================ STEP 3 ============================ -->
   <div class="bigstep">
     <div class="bigstep-head">
-      <div class="bignum">03</div>
-      <div>
-        <h3>Enrich the lead with an <em>HTTP Request</em> to Clearbit</h3>
-        <p class="step-intro">
-          Right now we only know the lead's name and email. Let's call <a href="https://clearbit.com" style="color:var(--cyan); border-bottom: 1px dashed;">Clearbit's</a> API to get their company, role, LinkedIn, etc. There's no dedicated Clearbit node, so we use the universal <b>HTTP Request</b> node — the master key for any API on the internet.
-        </p>
-      </div>
+      <span class="step-label">Step 03 — Enrich</span>
+      <h3>Call <em>Clearbit's API</em> with an HTTP Request node</h3>
+      <p class="step-intro">
+        Right now we only know the lead's name and email. Let's call <a href="https://clearbit.com" style="color:var(--cyan); border-bottom: 1px dashed var(--line-2);">Clearbit's</a> API to get their company, role, LinkedIn, etc. There's no dedicated Clearbit node, so we use the universal <b>HTTP Request</b> node — the master key for any API on the internet.
+      </p>
     </div>
 
     <div class="bigstep-body">
@@ -2409,13 +2449,11 @@
   <!-- ============================ STEP 4 ============================ -->
   <div class="bigstep">
     <div class="bigstep-head">
-      <div class="bignum">04</div>
-      <div>
-        <h3>Send a <em>Slack</em> message to your sales team</h3>
-        <p class="step-intro">
-          Now the fun part — broadcasting this to humans. We'll use the <b>Slack</b> node to post a rich message to <code>#sales-hot-leads</code> with all the enriched data we just fetched.
-        </p>
-      </div>
+      <span class="step-label">Step 04 — Notify</span>
+      <h3>Send a <em>Slack</em> message to your sales team</h3>
+      <p class="step-intro">
+        Now the fun part — broadcasting this to humans. We'll use the <b>Slack</b> node to post a rich message to <code class="inline">#sales-hot-leads</code> with all the enriched data we just fetched.
+      </p>
     </div>
 
     <div class="bigstep-body">
@@ -2551,13 +2589,11 @@
   <!-- ============================ STEP 5 ============================ -->
   <div class="bigstep">
     <div class="bigstep-head">
-      <div class="bignum">05</div>
-      <div>
-        <h3>Save it forever — append a row to <em>Google Sheets</em></h3>
-        <p class="step-intro">
-          Slack messages scroll away. We want a permanent record. The <b>Google Sheets</b> node lets us add a row to a spreadsheet every time this fires — perfect for tracking, dashboards, and the sales team's pipeline review.
-        </p>
-      </div>
+      <span class="step-label">Step 05 — Persist</span>
+      <h3>Append a row to <em>Google Sheets</em> for the record</h3>
+      <p class="step-intro">
+        Slack messages scroll away. We want a permanent record. The <b>Google Sheets</b> node lets us add a row to a spreadsheet every time this fires — perfect for tracking, dashboards, and the sales team's pipeline review.
+      </p>
     </div>
 
     <div class="bigstep-body">
