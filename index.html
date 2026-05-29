@@ -957,7 +957,7 @@
     <div class="option featured">
       <span class="pickme">Recommended for vibe coders</span>
       <h3>n8n Cloud</h3>
-      <div class="price">~$20/mo · 14-day free trial · no credit card required to start</div>
+      <div class="price">€20/mo Starter · billed annually · free trial, no credit card for Starter/Pro</div>
       <ul>
         <li>Sign up at <code class="inline">n8n.io</code>, click "Get started", you're in.</li>
         <li>No installing anything. Works in your browser.</li>
@@ -1377,11 +1377,11 @@
     <div class="expr-card">
       <div class="ttl">
         <h4>Output of an earlier node</h4>
-        <button class="copy" data-copy='{{ $node["HubSpot"].json.id }}'>Copy</button>
+        <button class="copy" data-copy="{{ $('Webhook').first().json.body.email }}">Copy</button>
       </div>
-      <pre>{{ $node["HubSpot"].json.id }}</pre>
-      <p class="note">Jump back several nodes. Useful when you've branched and need to refer to data from before the branch.</p>
-      <p class="english">Use the ID that the HubSpot node produced earlier.</p>
+      <pre>{{ $('Webhook').first().json.body.email }}</pre>
+      <p class="note">Jump back several nodes. <code class="inline">$('NodeName')</code> grabs that node's data; <code class="inline">.first()</code> gets the first item; then you reach into it normally. (Older syntax <code class="inline">$node["Name"]</code> still works but this is the modern form.)</p>
+      <p class="english">Use the email that the Webhook node received earlier.</p>
     </div>
 
     <div class="expr-card">
@@ -2005,13 +2005,13 @@
 
 <section id="first" class="container">
   <span class="eyebrow">08 · Hands-on tutorial</span>
-  <h2 style="margin-top:24px; max-width: 1100px;">Let's build one together: <em>"alert me on Slack when a paying lead signs up"</em>.</h2>
+  <h2 style="margin-top:24px; max-width: 1100px;">Let's build one together: <em>"alert me when a big lead fills my contact form, and have AI summarize what they want"</em>.</h2>
 
   <div class="prose">
     <p>
       This is the most important section of the guide. Walk through it once — really do it,
       don't just read — and you'll have done <strong>every fundamental move</strong> n8n offers.
-      Triggers, branching, calling APIs, sending messages, saving data. After this, every other
+      Triggers, branching, calling AI, sending messages, saving data. After this, every other
       workflow you'll ever build is just a remix of these five moves.
     </p>
   </div>
@@ -2021,13 +2021,14 @@
     <div>
       <h3>What we're building</h3>
       <p>
-        Imagine you run a SaaS product. Your landing page has a "Sign up for Pro" form. When
-        someone fills it, three things should happen <em>instantly and automatically</em>:
+        Imagine your business website has a "Contact us" form where prospects type their name,
+        company, budget, and what they need. When someone fills it, three things should happen
+        <em>instantly and automatically</em>:
       </p>
       <ol style="margin-top: 16px; padding-left: 20px; color: var(--paper-dim); font-size: 15px; line-height: 1.8;">
-        <li>Your sales team gets a Slack ping in <code class="inline">#sales-hot-leads</code> with the lead's info.</li>
-        <li>The lead's email + company gets enriched (so you know who they are before reaching out).</li>
-        <li>A row gets added to your master leads spreadsheet for tracking.</li>
+        <li>Only big leads matter — if the budget is over <b>$5,000</b>, we follow up. Otherwise, we ignore it.</li>
+        <li>AI reads the lead's message and writes a 2-sentence summary + suggested follow-up action.</li>
+        <li>Your sales team gets a rich Slack ping; the lead's data + AI summary lands in a master spreadsheet.</li>
       </ol>
       <p style="margin-top: 18px;">
         That's it. Zero servers, zero code, ~10 minutes to build. Here's the final flow:
@@ -2036,7 +2037,7 @@
         <span class="hot">5 nodes</span>
         <span>~10 min</span>
         <span>free tier ok</span>
-        <span>copy-pasteable</span>
+        <span>uses ai</span>
       </div>
     </div>
     <div class="fw-finalflow">
@@ -2051,14 +2052,14 @@
         <div class="ix">?</div>
         <div>
           <div class="nm">IF</div>
-          <div class="ds">logic · only continue if plan = "pro"</div>
+          <div class="ds">logic · only continue if budget &gt; 5000</div>
         </div>
       </div>
       <div class="fnode">
-        <div class="ix">⊕</div>
+        <div class="ix">✦</div>
         <div>
-          <div class="nm">HTTP Request</div>
-          <div class="ds">action · enrich with Clearbit</div>
+          <div class="nm">OpenAI</div>
+          <div class="ds">action · summarize the lead's message</div>
         </div>
       </div>
       <div class="fnode">
@@ -2098,7 +2099,7 @@
           <li>The right-hand inspector opens automatically. Set <b>HTTP Method</b> = <code>POST</code> and <b>Path</b> = <code>lead-form</code> (you can pick any path name — it becomes part of the URL).</li>
           <li>Leave <b>Respond</b> as <code>Immediately</code>. This means the workflow will respond "200 OK" instantly while the rest of the flow keeps processing.</li>
           <li>At the top of the inspector, you'll see two URLs: <b>Test URL</b> and <b>Production URL</b>. Copy the <b>Test URL</b> to your clipboard.</li>
-          <li>Click the orange button: <kbd>Listen for test event</kbd>. The node will say "Waiting for webhook call..." — n8n is now actively listening on that URL.</li>
+          <li>Click the orange button: <kbd>Listen for test event</kbd>. The node will start listening for <b>120 seconds</b> (the official window — if no request arrives in that time, click the button again).</li>
           <li>Open your terminal (or use a tool like Postman) and send a test POST request — see the command below the screenshot.</li>
           <li>Switch back to n8n: a green checkmark appears on the node, and the right-side <b>OUTPUT</b> panel fills with the JSON you just sent.</li>
         </ol>
@@ -2107,7 +2108,13 @@
 <span class="cmd-c"># Paste this in your terminal — replace the URL with your Test URL</span>
 <span class="cmd-k">curl</span> -X POST <span class="cmd-u">https://your-n8n.io/webhook-test/lead-form</span> \
   -H <span class="cmd-s">"Content-Type: application/json"</span> \
-  -d <span class="cmd-s">'{ "name": "Lucy Chen", "email": "lucy@acme.com", "plan": "pro" }'</span>
+  -d <span class="cmd-s">'{
+    "name": "Lucy Chen",
+    "email": "lucy@acme.com",
+    "company": "Acme Corp",
+    "budget": 8000,
+    "message": "Hi! We are a 50-person team looking for workflow automation. We need Stripe + Notion + Slack integrations. Can we schedule a demo this week?"
+  }'</span>
         </div>
 
         <div class="callout mistake">
@@ -2169,7 +2176,7 @@
               <div class="lab">Respond</div>
               <div class="val dropdown">Immediately</div>
             </div>
-            <div class="listening">Listening for test event · click submit on your form</div>
+            <div class="listening">Listening for test event · 120-second window</div>
           </div>
         </div>
 
@@ -2185,9 +2192,11 @@
 <pre>{
   <span class="k">"headers"</span>: { <span class="k">"content-type"</span>: <span class="s">"application/json"</span> },
   <span class="k">"body"</span>: {
-    <span class="k">"name"</span>:  <span class="s">"Lucy Chen"</span>,
-    <span class="k">"email"</span>: <span class="s">"lucy@acme.com"</span>,
-    <span class="k">"plan"</span>:  <span class="s">"pro"</span>
+    <span class="k">"name"</span>:    <span class="s">"Lucy Chen"</span>,
+    <span class="k">"email"</span>:   <span class="s">"lucy@acme.com"</span>,
+    <span class="k">"company"</span>: <span class="s">"Acme Corp"</span>,
+    <span class="k">"budget"</span>:  <span class="n">8000</span>,
+    <span class="k">"message"</span>: <span class="s">"Hi! We are a 50-person team..."</span>
   },
   <span class="k">"query"</span>: {},
   <span class="k">"webhookUrl"</span>: <span class="s">"https://your-n8n.io/webhook/lead-form"</span>
@@ -2201,9 +2210,9 @@
   <div class="bigstep">
     <div class="bigstep-head">
       <span class="step-label">Step 02 — Logic</span>
-      <h3>Add an <em>IF</em> node to filter only Pro plan signups</h3>
+      <h3>Add an <em>IF</em> node to filter only big-budget leads</h3>
       <p class="step-intro">
-        Not every signup is a hot lead — only the ones who picked the Pro plan. The <b>IF</b> node has two outputs: a green <b>TRUE</b> branch (condition matched) and a red <b>FALSE</b> branch (condition didn't match). We'll only continue down TRUE.
+        Not every contact form submission is a hot lead — only the ones with a real budget. We'll skip anyone under <b>$5,000</b>. The <b>IF</b> node has two outputs: a green <b>TRUE</b> branch (condition matched) and a red <b>FALSE</b> branch (condition didn't match). We'll only continue down TRUE.
       </p>
     </div>
 
@@ -2214,12 +2223,12 @@
           <li>Type <code>if</code> in the search. Click the <b>If</b> node (with the question mark icon).</li>
           <li>A new IF node appears, automatically connected to the Webhook node. The inspector opens.</li>
           <li>You'll see an empty <b>Conditions</b> section. Click <kbd>+ Add Condition</kbd>.</li>
-          <li>Pick condition type: <b>String</b>. We're comparing the plan field, which is text.</li>
+          <li>Pick condition type: <b>Number</b>. We're comparing the budget field, which is a number (not text).</li>
           <li>On the <b>Value 1</b> (left side) field, click the small <kbd>{ }</kbd> icon to switch to <b>Expression mode</b>. The field turns yellow-green.</li>
-          <li>Now look at the left side of the screen — there's an <b>INPUT</b> panel showing the JSON from the Webhook. Find the <code>body.plan</code> field and <b>drag it</b> right onto the Value 1 input. n8n writes <code>{{ $json.body.plan }}</code> for you.</li>
-          <li>For <b>Operation</b>, pick <code>is equal to</code> from the dropdown.</li>
-          <li>For <b>Value 2</b> (right side), leave it in Fixed mode and just type <code>pro</code>. No quotes needed.</li>
-          <li>Click <kbd>Execute previous nodes</kbd> at the top of the inspector to test. Look at the output — you should see the item in the <b>true</b> branch (since our test data has <code>plan: "pro"</code>).</li>
+          <li>Now look at the left side of the screen — there's an <b>INPUT</b> panel showing the JSON from the Webhook. Find the <code>body.budget</code> field and <b>drag it</b> right onto the Value 1 input. n8n writes <code>{{ $json.body.budget }}</code> for you automatically.</li>
+          <li>For <b>Operation</b>, pick <code>is greater than</code> from the dropdown.</li>
+          <li>For <b>Value 2</b> (right side), leave it in Fixed mode and type <code>5000</code>.</li>
+          <li>Click <kbd>Execute previous nodes</kbd> at the top of the inspector to test. Look at the output — you should see the item in the <b>true</b> branch (since our test budget of 8000 is greater than 5000).</li>
         </ol>
 
         <div class="callout tip">
@@ -2227,7 +2236,7 @@
         </div>
 
         <div class="callout mistake">
-          <b>Common mistake:</b> typing the field name manually (like <code>$json.plan</code>) when the actual path is <code>$json.body.plan</code>. Why? Because the Webhook node wraps the request body inside a <code>body</code> field. Always check the OUTPUT panel of the previous node to see the real shape before typing paths.
+          <b>Common mistake:</b> picking <b>String</b> condition type when you're comparing numbers. If you pick String, the comparison "8000 > 5000" actually compares as text alphabetically and fails. Always match the type to the actual field shape: numbers → Number, text → String, dates → DateTime, true/false → Boolean.
         </div>
       </div>
 
@@ -2246,9 +2255,9 @@
                 <div style="color:var(--hot);">body</div>
                 <div style="padding-left: 12px;">name <span style="color:var(--acid)">"Lucy"</span></div>
                 <div style="padding-left: 12px;">email <span style="color:var(--acid)">"lucy@..."</span></div>
-                <div style="padding-left: 12px; background: rgba(106,215,229,0.1); border-radius: 4px; padding: 2px 12px; color: var(--cyan);">plan <span style="color:var(--acid)">"pro"</span> ← drag this</div>
-                <div style="margin-top: 8px; color:var(--hot);">headers</div>
-                <div style="padding-left: 12px;">content-type</div>
+                <div style="padding-left: 12px;">company <span style="color:var(--acid)">"Acme"</span></div>
+                <div style="padding-left: 12px; background: rgba(106,215,229,0.1); border-radius: 4px; padding: 2px 12px; color: var(--cyan);">budget <span style="color:var(--acid)">8000</span> ← drag this</div>
+                <div style="padding-left: 12px;">message <span style="color:var(--acid)">"Hi! ..."</span></div>
               </div>
             </div>
             <div class="screen-canvas" style="min-height: 220px;">
@@ -2262,7 +2271,7 @@
               <div class="scn logic cur" style="top: 80px; left: 240px;">
                 <div class="scn-ico">?</div>
                 <div class="scn-name">If</div>
-                <div class="scn-sub">plan = pro</div>
+                <div class="scn-sub">budget &gt; 5000</div>
                 <div class="scn-handle" style="top: 30%;"></div>
                 <div class="scn-handle" style="top: 70%; background: var(--hot-2);"></div>
               </div>
@@ -2276,16 +2285,20 @@
             </div>
             <div style="margin-top: 14px; padding: 12px; background: var(--ink); border: 1px solid var(--line); border-radius: 6px;">
               <div class="field" style="border-bottom: 0; padding: 4px 0;">
+                <div class="lab">Type</div>
+                <div class="val dropdown">Number</div>
+              </div>
+              <div class="field" style="border-bottom: 0; padding: 4px 0;">
                 <div class="lab">Value 1</div>
-                <div class="val exp">{{ $json.body.plan }}</div>
+                <div class="val exp">{{ $json.body.budget }}</div>
               </div>
               <div class="field" style="border-bottom: 0; padding: 4px 0;">
                 <div class="lab">Operation</div>
-                <div class="val dropdown">is equal to</div>
+                <div class="val dropdown">is greater than</div>
               </div>
               <div class="field" style="border-bottom: 0; padding: 4px 0;">
                 <div class="lab">Value 2</div>
-                <div class="val">pro</div>
+                <div class="val">5000</div>
               </div>
             </div>
           </div>
@@ -2303,9 +2316,10 @@
 <pre>{
   <span class="c">// the item passed through — same JSON as input</span>
   <span class="k">"body"</span>: {
-    <span class="k">"name"</span>:  <span class="s">"Lucy Chen"</span>,
-    <span class="k">"email"</span>: <span class="s">"lucy@acme.com"</span>,
-    <span class="k">"plan"</span>:  <span class="s">"pro"</span>  <span class="c">// ← matched!</span>
+    <span class="k">"name"</span>:    <span class="s">"Lucy Chen"</span>,
+    <span class="k">"company"</span>: <span class="s">"Acme Corp"</span>,
+    <span class="k">"budget"</span>:  <span class="n">8000</span>,  <span class="c">// ← 8000 &gt; 5000, matched!</span>
+    <span class="k">"message"</span>: <span class="s">"Hi! ..."</span>
   }
 }</pre>
         </div>
@@ -2316,10 +2330,10 @@
   <!-- ============================ STEP 3 ============================ -->
   <div class="bigstep">
     <div class="bigstep-head">
-      <span class="step-label">Step 03 — Enrich</span>
-      <h3>Call <em>Clearbit's API</em> with an HTTP Request node</h3>
+      <span class="step-label">Step 03 — Enrich with AI</span>
+      <h3>Have <em>OpenAI</em> summarize the lead's message in 2 sentences</h3>
       <p class="step-intro">
-        Right now we only know the lead's name and email. Let's call <a href="https://clearbit.com" style="color:var(--cyan); border-bottom: 1px dashed var(--line-2);">Clearbit's</a> API to get their company, role, LinkedIn, etc. There's no dedicated Clearbit node, so we use the universal <b>HTTP Request</b> node — the master key for any API on the internet.
+        The lead wrote a long message. Your sales team doesn't have time to read every full message — they want the <b>gist</b> instantly. We'll send the message to GPT-4o-mini and get back a 2-sentence summary plus a suggested follow-up action.
       </p>
     </div>
 
@@ -2327,27 +2341,34 @@
       <div>
         <ol class="substeps">
           <li>From the <b>true</b> output of the IF node (top exit point), drag a connection onto empty canvas.</li>
-          <li>Search <code>http request</code> in the picker. Click the <b>HTTP Request</b> node.</li>
-          <li>In the inspector, set <b>Method</b> = <code>GET</code>.</li>
-          <li>For <b>URL</b>, paste: <code>https://person.clearbit.com/v2/people/find</code></li>
-          <li>Scroll down to <b>Authentication</b>. Set it to <code>Generic Credential Type</code>, then <code>Header Auth</code>.</li>
-          <li>Click <kbd>+ Create New Credential</kbd>. A modal opens. <b>Name</b> = <code>Authorization</code>, <b>Value</b> = <code>Bearer your-clearbit-api-key</code>. Click <kbd>Save</kbd>. The modal closes — your credential is now stored encrypted.</li>
-          <li>Back in the main inspector, find <b>Send Query Parameters</b> and toggle it <code>ON</code>.</li>
-          <li>Click <kbd>+ Add Parameter</kbd>. <b>Name</b> = <code>email</code>. For <b>Value</b>, click the <kbd>{ }</kbd> to switch to Expression mode, then drag <code>body.email</code> from the INPUT panel on the left.</li>
-          <li>Click <kbd>Execute node</kbd> (top-right of inspector). After ~1 second, the OUTPUT panel fills with enriched data: full name, company, role, LinkedIn URL, etc.</li>
+          <li>Search <code>openai</code> in the picker. Click the <b>OpenAI</b> node.</li>
+          <li>In the inspector, the <b>Credential</b> dropdown is empty. Click <kbd>+ Create new credential</kbd>.</li>
+          <li>Open <a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a> in another tab, click <kbd>Create new secret key</kbd>, copy it (starts with <code>sk-...</code>).</li>
+          <li>Back in n8n: paste your key into the <b>API Key</b> field. Click <kbd>Save</kbd>. The credential is now stored encrypted.</li>
+          <li>Back in the main inspector: <b>Resource</b> = <code>Text</code>, <b>Operation</b> = <code>Message a Model</code>.</li>
+          <li>For <b>Model</b>, pick <code>gpt-4o-mini</code> (cheap and fast — ~$0.0001 per call).</li>
+          <li>Under <b>Messages</b>, click <kbd>+ Add Message</kbd>. Set role to <code>user</code>. For the content, switch to Expression mode and paste the prompt below the screenshot.</li>
+          <li>Toggle <b>Simplify Output</b> to <code>ON</code> — this gives you just the response text, instead of OpenAI's full API response object.</li>
+          <li>Click <kbd>Execute node</kbd>. After ~2 seconds, the OUTPUT panel shows the AI's 2-sentence summary.</li>
         </ol>
 
+        <div class="testcmd">
+<span class="cmd-c"># Prompt to paste into the OpenAI message content (Expression mode)</span>
+You are a sales assistant. A new lead just filled our contact form.
+Their message: "{{ $json.body.message }}"
+Their budget: ${{ $json.body.budget }}
+
+Return ONLY two sentences:
+1. A 1-sentence summary of what they need.
+2. A 1-sentence suggested next action for our sales team.
+        </div>
+
         <div class="callout tip">
-          <b>Generic Credential Type</b> is your friend for any API n8n doesn't have a dedicated node for. The most common types are:
-          <br><br>
-          <b>Header Auth</b> — the API expects a header like <code>Authorization: Bearer xyz</code>. <br>
-          <b>Query Auth</b> — the API expects <code>?api_key=xyz</code> in the URL. <br>
-          <b>Basic Auth</b> — old-school username + password. <br><br>
-          Check the API's docs (every API has an "Authentication" section). Match the type, paste your key, you're in.
+          <b>Why we use the dedicated OpenAI node instead of HTTP Request:</b> n8n wraps OpenAI's API in a friendly form — model dropdown, message builder, automatic token counting, error handling. You could call <code>api.openai.com/v1/chat/completions</code> via HTTP Request with Bearer Auth, but the dedicated node is faster and harder to break.
         </div>
 
         <div class="callout mistake">
-          <b>Common mistake:</b> pasting the raw API key without the word <code>Bearer</code>. Most modern APIs require the value to be literally <code>Bearer sk_live_abc123...</code> (with the word "Bearer" + space + the key). If you get a 401 Unauthorized error, this is the first thing to check.
+          <b>Common mistake:</b> forgetting to enable <b>Simplify Output</b>. Without it, the OUTPUT panel gives you a deeply nested OpenAI response object like <code>{ choices: [{ message: { content: "..." } }] }</code>, and your Slack message will end up printing JSON instead of the summary. With Simplify Output on, you just access <code>{{ $json.message.content }}</code> — clean and direct.
         </div>
       </div>
 
@@ -2365,8 +2386,10 @@
               <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.8; color: var(--paper-dim);">
                 <div style="color:var(--hot);">body</div>
                 <div style="padding-left: 12px;">name</div>
-                <div style="padding-left: 12px; background: rgba(106,215,229,0.1); border-radius: 4px; padding: 2px 12px; color: var(--cyan);">email ← drag</div>
-                <div style="padding-left: 12px;">plan</div>
+                <div style="padding-left: 12px;">email</div>
+                <div style="padding-left: 12px;">company</div>
+                <div style="padding-left: 12px;">budget</div>
+                <div style="padding-left: 12px; background: rgba(106,215,229,0.1); border-radius: 4px; padding: 2px 12px; color: var(--cyan);">message ← use this</div>
               </div>
             </div>
             <div class="screen-canvas" style="min-height: 220px;">
@@ -2382,47 +2405,45 @@
                 <div class="scn-sub">✓ true</div>
               </div>
               <div class="scn-wire live" style="top: 92px; left: 318px; width: 32px;"></div>
-              <div class="scn action cur" style="top: 70px; left: 354px;">
-                <div class="scn-ico">⊕</div>
-                <div class="scn-name">HTTP Request</div>
-                <div class="scn-sub">clearbit</div>
+              <div class="scn action cur" style="top: 70px; left: 354px; background: linear-gradient(135deg, #1a1a26, rgba(139,124,246,0.15));">
+                <div class="scn-ico" style="background: var(--violet); color: var(--paper);">✦</div>
+                <div class="scn-name">OpenAI</div>
+                <div class="scn-sub">gpt-4o-mini</div>
               </div>
             </div>
           </div>
           <div class="inspector">
-            <h6>⊕ HTTP Request · configuration</h6>
+            <h6>✦ OpenAI · message a model</h6>
             <div class="field">
-              <div class="lab">Method</div>
-              <div class="val dropdown">GET</div>
+              <div class="lab">Credential</div>
+              <div class="val dropdown">OpenAI · my-account</div>
             </div>
             <div class="field">
-              <div class="lab">URL</div>
-              <div class="val">https://person.clearbit.com/v2/people/find</div>
+              <div class="lab">Resource</div>
+              <div class="val dropdown">Text</div>
             </div>
             <div class="field">
-              <div class="lab">Authentication</div>
-              <div class="val dropdown">Header Auth · clearbit-key</div>
+              <div class="lab">Operation</div>
+              <div class="val dropdown">Message a Model</div>
             </div>
             <div class="field">
-              <div class="lab">Send Query Params</div>
+              <div class="lab">Model</div>
+              <div class="val dropdown">gpt-4o-mini</div>
+            </div>
+            <div class="field" style="align-items: flex-start;">
+              <div class="lab">User Message</div>
+              <div class="val exp" style="white-space: pre-line; font-size: 11px; line-height: 1.5;">You are a sales assistant.&#10;Message: "{{ $json.body.message }}"&#10;Budget: ${{ $json.body.budget }}&#10;Return 2 sentences: summary + next action.</div>
+            </div>
+            <div class="field">
+              <div class="lab">Simplify Output</div>
               <div class="val checked">enabled</div>
-            </div>
-            <div style="margin: 8px 0 0 130px; padding: 10px 14px; background: var(--ink); border: 1px solid var(--line); border-radius: 6px;">
-              <div class="field" style="border-bottom: 0; padding: 4px 0;">
-                <div class="lab">name</div>
-                <div class="val">email</div>
-              </div>
-              <div class="field" style="border-bottom: 0; padding: 4px 0;">
-                <div class="lab">value</div>
-                <div class="val exp">{{ $json.body.email }}</div>
-              </div>
             </div>
           </div>
         </div>
 
         <div class="output-pane">
           <div class="op-bar">
-            <div class="op-label">▼ Output · enriched person · 1 item</div>
+            <div class="op-label">▼ Output · AI response · 1 item</div>
             <div class="op-tabs">
               <span>Table</span>
               <span class="on">JSON</span>
@@ -2430,16 +2451,10 @@
             </div>
           </div>
 <pre>{
-  <span class="k">"id"</span>: <span class="s">"d54c54ad-..."</span>,
-  <span class="k">"name"</span>: { <span class="k">"fullName"</span>: <span class="s">"Lucy Chen"</span> },
-  <span class="k">"email"</span>: <span class="s">"lucy@acme.com"</span>,
-  <span class="k">"employment"</span>: {
-    <span class="k">"name"</span>:  <span class="s">"Acme Corp"</span>,
-    <span class="k">"title"</span>: <span class="s">"Head of Product"</span>,
-    <span class="k">"role"</span>:  <span class="s">"product"</span>
-  },
-  <span class="k">"linkedin"</span>: { <span class="k">"handle"</span>: <span class="s">"in/lucychen"</span> },
-  <span class="k">"location"</span>: <span class="s">"San Francisco, CA, USA"</span>
+  <span class="k">"message"</span>: {
+    <span class="k">"role"</span>: <span class="s">"assistant"</span>,
+    <span class="k">"content"</span>: <span class="s">"A 50-person team needs workflow automation connecting Stripe, Notion, and Slack, and wants a demo this week. Reply within 2 hours offering a 30-min demo slot — high intent, qualifying budget."</span>
+  }
 }</pre>
         </div>
       </div>
@@ -2459,34 +2474,35 @@
     <div class="bigstep-body">
       <div>
         <ol class="substeps">
-          <li>From the HTTP Request node's output, drag a connection onto empty canvas. Search <code>slack</code>.</li>
+          <li>From the OpenAI node's output, drag a connection onto empty canvas. Search <code>slack</code>.</li>
           <li>Click the <b>Slack</b> node (not the "Trigger" variant — we want the action one).</li>
           <li>In the inspector, the first thing is the <b>Credential</b> dropdown — it's empty. Click <kbd>+ Create new credential</kbd>.</li>
           <li>A modal opens. Pick <b>Slack OAuth2 API</b> (easiest path — no Bot Token wrangling needed).</li>
-          <li>Click <kbd>Sign in with Slack</kbd>. A popup opens — pick your workspace, approve the permissions ("post to channels", "read user info"). The popup closes and your credential is saved.</li>
+          <li>Click <kbd>Connect my account</kbd>. A popup opens — pick your workspace, approve the permissions ("post to channels", "read user info"). The popup closes and your credential is saved.</li>
           <li>Back in the main inspector: <b>Resource</b> = <code>Message</code>, <b>Operation</b> = <code>Send</code>.</li>
           <li>For <b>Send Message To</b>, pick <code>Channel</code>. For <b>Channel</b>, start typing — n8n shows your real Slack channels in a dropdown. Pick <code>#sales-hot-leads</code> (create it in Slack first if it doesn't exist).</li>
-          <li>For <b>Message Text</b>, switch to Expression mode and paste this:</li>
+          <li>For <b>Message Text</b>, switch to Expression mode and paste the template below. Notice how we reference <b>both</b> the Webhook's data (lead name, company, budget) <b>and</b> the OpenAI node's output (the summary).</li>
         </ol>
 
         <div class="testcmd" style="margin-top: 16px;">
-<span class="cmd-c"># Slack message template — drag-and-drop friendly</span>
-🔥 New <span class="cmd-k">Pro</span> signup!
+<span class="cmd-c"># Slack message template — uses data from 2 different nodes</span>
+🔥 *New <span class="cmd-k">$5K+</span> lead just came in!*
 
-*Name:* {{ $json.name.fullName }}
-*Email:* {{ $json.email }}
-*Company:* {{ $json.employment.name }}
-*Role:* {{ $json.employment.title }}
-*Location:* {{ $json.location }}
-*LinkedIn:* https://linkedin.com/{{ $json.linkedin.handle }}
+*Name:* {{ $('Webhook').first().json.body.name }}
+*Company:* {{ $('Webhook').first().json.body.company }}
+*Email:* {{ $('Webhook').first().json.body.email }}
+*Budget:* ${{ $('Webhook').first().json.body.budget }}
+
+*AI summary &amp; next step:*
+{{ $json.message.content }}
         </div>
 
         <ol class="substeps" start="9" style="counter-reset: sub 8;">
-          <li>Click <kbd>Execute node</kbd>. After a second, the OUTPUT panel shows a success object with the message ID. <b>Switch to Slack</b> — your message is live in the channel.</li>
+          <li>Click <kbd>Execute node</kbd>. After a second, the OUTPUT panel shows a success object with the message ID. <b>Switch to Slack</b> — your message is live in the channel, with the AI summary embedded.</li>
         </ol>
 
         <div class="callout success">
-          <b>Big moment:</b> right here is where most people fall in love with n8n. You just connected a webhook to a third-party API to your team's chat tool, with zero code, in about 6 minutes total.
+          <b>Big moment:</b> right here is where most people fall in love with n8n. You just chained a webhook → logic gate → AI model → team chat, with zero backend, in about 8 minutes total. And notice the magic: the Slack node referenced data from <em>two different earlier nodes</em> (the Webhook and the OpenAI node) using the modern <code>$('NodeName').first()</code> syntax.
         </div>
 
         <div class="callout mistake">
@@ -2526,8 +2542,8 @@
               </div>
               <div class="scn-wire live" style="top: 92px; left: 212px; width: 22px;"></div>
               <div class="scn action lit" style="top: 70px; left: 238px; width: 105px;">
-                <div class="scn-ico">⊕</div>
-                <div class="scn-name" style="font-size: 11px;">HTTP</div>
+                <div class="scn-ico" style="background: var(--violet); color: var(--paper);">✦</div>
+                <div class="scn-name" style="font-size: 11px;">OpenAI</div>
               </div>
               <div class="scn-wire live" style="top: 92px; left: 347px; width: 22px;"></div>
               <div class="scn notify cur" style="top: 70px; left: 372px; width: 100px;">
@@ -2561,7 +2577,7 @@
             </div>
             <div class="field" style="align-items: flex-start;">
               <div class="lab">Message Text</div>
-              <div class="val exp" style="white-space: pre-line; font-size: 11.5px; line-height: 1.6;">🔥 New Pro signup!&#10;*Name:* {{ $json.name.fullName }}&#10;*Email:* {{ $json.email }}&#10;*Company:* {{ $json.employment.name }}</div>
+              <div class="val exp" style="white-space: pre-line; font-size: 11px; line-height: 1.5;">🔥 *New $5K+ lead just came in!*&#10;*Name:* {{ $('Webhook').first().json.body.name }}&#10;*Company:* {{ $('Webhook').first().json.body.company }}&#10;*Budget:* ${{ $('Webhook').first().json.body.budget }}&#10;*AI summary:* {{ $json.message.content }}</div>
             </div>
           </div>
         </div>
@@ -2599,21 +2615,22 @@
     <div class="bigstep-body">
       <div>
         <ol class="substeps">
-          <li>Before opening n8n: in Google Sheets, create a new spreadsheet called <code>leads_2026</code>. In row 1, add column headers: <code>timestamp</code> · <code>name</code> · <code>email</code> · <code>company</code> · <code>title</code> · <code>plan</code>.</li>
+          <li>Before opening n8n: in Google Sheets, create a new spreadsheet called <code>leads_2026</code>. In row 1, add column headers: <code>timestamp</code> · <code>name</code> · <code>email</code> · <code>company</code> · <code>budget</code> · <code>message</code> · <code>ai_summary</code>.</li>
           <li>Back in n8n: from the Slack node's output, drag a new connection onto canvas. Search <code>google sheets</code>.</li>
           <li>Click <b>Google Sheets</b> (the action node, not the trigger).</li>
-          <li>In the credential dropdown, click <kbd>+ Create new credential</kbd>. Choose <b>Google Sheets OAuth2 API</b>. Click <kbd>Sign in with Google</kbd> → approve. Done.</li>
+          <li>In the credential dropdown, click <kbd>+ Create new credential</kbd>. Choose <b>Google Sheets OAuth2 API</b>. Click <kbd>Connect my account</kbd> → approve. Done.</li>
           <li>For <b>Resource</b>, pick <code>Sheet Within Document</code>. For <b>Operation</b>, pick <code>Append Row</code>.</li>
           <li>For <b>Document</b>, the dropdown loads all your Google Sheets — pick <code>leads_2026</code>. For <b>Sheet</b>, pick <code>Sheet1</code> (or whatever tab name).</li>
           <li>For <b>Mapping Column Mode</b>, pick <code>Map Each Column Manually</code>. n8n reads your headers and shows each one as a field to fill.</li>
-          <li>Now the magic — for each column, drag the matching field from the INPUT panel:
+          <li>Now the magic — for each column, drag the matching field. Notice we again pull from <b>two different nodes</b>:
             <ul style="margin-top: 8px; padding-left: 20px; color: var(--paper-dim); font-size: 13.5px; line-height: 1.8;">
               <li><b>timestamp</b> → expression: <code>{{ $now.toISO() }}</code></li>
-              <li><b>name</b> → drag <code>name.fullName</code></li>
-              <li><b>email</b> → drag <code>email</code></li>
-              <li><b>company</b> → drag <code>employment.name</code></li>
-              <li><b>title</b> → drag <code>employment.title</code></li>
-              <li><b>plan</b> → expression: <code>pro</code> (literal text)</li>
+              <li><b>name</b> → <code>{{ $('Webhook').first().json.body.name }}</code></li>
+              <li><b>email</b> → <code>{{ $('Webhook').first().json.body.email }}</code></li>
+              <li><b>company</b> → <code>{{ $('Webhook').first().json.body.company }}</code></li>
+              <li><b>budget</b> → <code>{{ $('Webhook').first().json.body.budget }}</code></li>
+              <li><b>message</b> → <code>{{ $('Webhook').first().json.body.message }}</code></li>
+              <li><b>ai_summary</b> → <code>{{ $('OpenAI').first().json.message.content }}</code></li>
             </ul>
           </li>
           <li>Click <kbd>Execute node</kbd>. Open your Google Sheet in a separate tab — a new row appears at the bottom with all the data filled in.</li>
@@ -2646,12 +2663,13 @@
                 <div style="color: var(--acid);">name</div>
                 <div style="color: var(--acid);">email</div>
                 <div style="color: var(--acid);">company</div>
-                <div style="color: var(--acid);">title</div>
-                <div style="color: var(--acid);">plan</div>
+                <div style="color: var(--acid);">budget</div>
+                <div style="color: var(--acid);">message</div>
+                <div style="color: var(--acid);">ai_summary</div>
               </div>
               <h6>Auto-detected</h6>
               <div style="font-size: 10.5px; color: var(--mute); padding: 0 10px;">
-                6 columns from row 1 of <span style="color:var(--paper)">leads_2026</span>
+                7 columns from row 1 of <span style="color:var(--paper)">leads_2026</span>
               </div>
             </div>
             <div class="screen-canvas" style="min-height: 220px;">
@@ -2666,8 +2684,8 @@
               </div>
               <div class="scn-wire live" style="top: 92px; left: 174px; width: 16px;"></div>
               <div class="scn action lit" style="top: 70px; left: 194px; width: 78px;">
-                <div class="scn-ico">⊕</div>
-                <div class="scn-name" style="font-size: 10.5px;">HTTP</div>
+                <div class="scn-ico" style="background: var(--violet); color: var(--paper);">✦</div>
+                <div class="scn-name" style="font-size: 10.5px;">OpenAI</div>
               </div>
               <div class="scn-wire live" style="top: 92px; left: 276px; width: 16px;"></div>
               <div class="scn notify lit" style="top: 70px; left: 296px; width: 76px;">
@@ -2701,16 +2719,16 @@
                 <div class="lab">timestamp</div><div class="val exp">{{ $now.toISO() }}</div>
               </div>
               <div class="field" style="border-bottom: 0; padding: 3px 0;">
-                <div class="lab">name</div><div class="val exp">{{ $json.name.fullName }}</div>
+                <div class="lab">name</div><div class="val exp">{{ $('Webhook').first().json.body.name }}</div>
               </div>
               <div class="field" style="border-bottom: 0; padding: 3px 0;">
-                <div class="lab">email</div><div class="val exp">{{ $json.email }}</div>
+                <div class="lab">company</div><div class="val exp">{{ $('Webhook').first().json.body.company }}</div>
               </div>
               <div class="field" style="border-bottom: 0; padding: 3px 0;">
-                <div class="lab">company</div><div class="val exp">{{ $json.employment.name }}</div>
+                <div class="lab">budget</div><div class="val exp">{{ $('Webhook').first().json.body.budget }}</div>
               </div>
               <div class="field" style="border-bottom: 0; padding: 3px 0;">
-                <div class="lab">plan</div><div class="val">pro</div>
+                <div class="lab">ai_summary</div><div class="val exp">{{ $('OpenAI').first().json.message.content }}</div>
               </div>
             </div>
           </div>
@@ -2723,12 +2741,13 @@
           </div>
 <pre>{
   <span class="k">"row"</span>: <span class="n">47</span>,
-  <span class="k">"timestamp"</span>: <span class="s">"2026-05-29T14:23:01.234Z"</span>,
-  <span class="k">"name"</span>:      <span class="s">"Lucy Chen"</span>,
-  <span class="k">"email"</span>:     <span class="s">"lucy@acme.com"</span>,
-  <span class="k">"company"</span>:   <span class="s">"Acme Corp"</span>,
-  <span class="k">"title"</span>:     <span class="s">"Head of Product"</span>,
-  <span class="k">"plan"</span>:      <span class="s">"pro"</span>
+  <span class="k">"timestamp"</span>:  <span class="s">"2026-05-29T14:23:01.234Z"</span>,
+  <span class="k">"name"</span>:       <span class="s">"Lucy Chen"</span>,
+  <span class="k">"email"</span>:      <span class="s">"lucy@acme.com"</span>,
+  <span class="k">"company"</span>:    <span class="s">"Acme Corp"</span>,
+  <span class="k">"budget"</span>:     <span class="n">8000</span>,
+  <span class="k">"message"</span>:    <span class="s">"Hi! We are a 50-person team..."</span>,
+  <span class="k">"ai_summary"</span>: <span class="s">"A 50-person team needs workflow automation..."</span>
 }
 
 <span class="c">// ✓ workflow saved as "Hot Lead Alert"</span>
