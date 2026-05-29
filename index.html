@@ -135,29 +135,49 @@
   .hero-sub .meta div + div { margin-top: 14px; }
   @media (max-width: 720px) { .hero-sub { grid-template-columns: 1fr; gap: 28px; } }
 
-  /* Playable mini workflow */
+  /* Playable mini workflow — hero edition */
   .workflow-demo {
     margin-top: 70px;
     border: 1px solid var(--line);
     border-radius: var(--r-lg);
     background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
-    padding: 30px 24px 24px;
+    padding: 22px 22px 22px;
     position: relative; overflow: hidden;
   }
   .workflow-demo::before {
     content: ""; position: absolute; inset: 0;
     background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
     background-size: 22px 22px;
-    pointer-events: none; opacity: 0.7;
+    pointer-events: none; opacity: 0.55;
   }
   .workflow-demo .bar {
     display: flex; justify-content: space-between; align-items: center;
-    position: relative; z-index: 2; margin-bottom: 24px;
+    position: relative; z-index: 2; margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
   }
   .workflow-demo .bar .left {
     display: flex; align-items: center; gap: 14px;
     font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
-    color: var(--mute); text-transform: uppercase; letter-spacing: .15em;
+    color: var(--mute); text-transform: uppercase; letter-spacing: .14em;
+  }
+  .workflow-demo .bar .left .wf-name { color: var(--paper); }
+  .workflow-demo .bar .left .wf-status {
+    color: var(--acid);
+    background: rgba(200,255,77,0.08);
+    border: 1px solid rgba(200,255,77,0.3);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: .12em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .workflow-demo .bar .left .wf-status::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--acid);
+    box-shadow: 0 0 8px var(--acid);
   }
   .workflow-demo .bar .left .dots { display: inline-flex; gap: 6px; }
   .workflow-demo .bar .left .dots span {
@@ -175,10 +195,11 @@
     border-radius: 999px;
     cursor: pointer;
     display: inline-flex; align-items: center; gap: 8px;
-    transition: transform .15s ease, box-shadow .2s;
+    transition: transform .15s ease, box-shadow .2s, opacity .2s;
     font-weight: 700;
   }
   .run-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(234,75,113,0.35); }
+  .run-btn:disabled { opacity: 0.55; cursor: not-allowed; }
   .run-btn .tri {
     width: 0; height: 0;
     border-left: 7px solid var(--ink);
@@ -187,61 +208,205 @@
   }
 
   .canvas {
-    position: relative; height: 220px; z-index: 2;
+    position: relative;
+    z-index: 2;
+    padding: 18px 0 16px;
   }
-  .canvas svg.wires {
-    position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+
+  .wf-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    position: relative;
+    align-items: stretch;
   }
-  .canvas .node {
-    position: absolute;
-    width: 130px; padding: 14px 12px;
+  .wf-node {
+    position: relative;
     background: var(--ink-3);
     border: 1px solid var(--line-2);
     border-radius: var(--r);
-    transform: translate(-50%, -50%);
-    display: flex; flex-direction: column; gap: 6px;
-    transition: transform .2s, box-shadow .25s, border-color .25s;
+    padding: 16px 16px 14px;
+    display: flex; flex-direction: column;
+    transition: border-color .3s, transform .3s, box-shadow .3s, background .3s;
+    margin: 0 6px;
+    min-height: 138px;
   }
-  .canvas .node .ico {
-    width: 28px; height: 28px; border-radius: 7px;
+  .wf-node .wf-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .wf-node .wf-ico {
+    width: 32px; height: 32px; border-radius: 8px;
     display: grid; place-items: center;
-    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
     color: var(--ink); font-weight: 800;
+    flex-shrink: 0;
   }
-  .canvas .node .label { font-size: 13px; font-weight: 600; }
-  .canvas .node .sub { font-size: 10.5px; color: var(--mute); font-family: 'JetBrains Mono', monospace; }
-  .canvas .node.lit { border-color: var(--hot); box-shadow: 0 0 0 4px rgba(234,75,113,0.12), 0 12px 40px rgba(234,75,113,0.25); transform: translate(-50%, -50%) scale(1.04); }
-
-  .node.trigger .ico { background: var(--hot); }
-  .node.action  .ico { background: var(--cyan); }
-  .node.logic   .ico { background: var(--amber); }
-  .node.out     .ico { background: var(--acid); }
-
-  .n1 { top: 50%; left: 9%; }
-  .n2 { top: 50%; left: 33%; }
-  .n3 { top: 22%; left: 60%; }
-  .n4 { top: 78%; left: 60%; }
-  .n5 { top: 50%; left: 88%; }
-
-  .wires path {
-    stroke: var(--line-2); stroke-width: 2; fill: none;
-    stroke-dasharray: 6 6;
+  .wf-node .wf-meta {
+    flex: 1; min-width: 0;
   }
-  .wires path.active {
-    stroke: var(--hot);
-    stroke-dasharray: 8 8;
-    animation: dash 1s linear infinite;
-    filter: drop-shadow(0 0 6px rgba(234,75,113,0.6));
+  .wf-node .wf-name { font-size: 14px; font-weight: 600; color: var(--paper); line-height: 1.2; }
+  .wf-node .wf-type {
+    font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--mute); font-family: 'JetBrains Mono', monospace;
+    margin-top: 3px;
   }
-  @keyframes dash { to { stroke-dashoffset: -28; } }
+  .wf-node .wf-desc {
+    font-size: 12px; color: var(--paper-dim);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .wf-node .wf-desc code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    padding: 1px 5px; border-radius: 3px;
+    color: var(--acid);
+  }
+  .wf-node .wf-status {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--mute);
+    letter-spacing: .08em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .wf-node .wf-status .wf-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line-2);
+  }
 
-  @media (max-width: 720px) {
-    .canvas { height: auto; min-height: 360px; }
-    .n1 { top: 8%;  left: 50%; }
-    .n2 { top: 30%; left: 50%; }
-    .n3 { top: 54%; left: 28%; }
-    .n4 { top: 54%; left: 72%; }
-    .n5 { top: 90%; left: 50%; }
+  /* Per-node color */
+  .wf-node.wf-trigger .wf-ico { background: var(--hot); }
+  .wf-node.wf-logic   .wf-ico { background: var(--amber); }
+  .wf-node.wf-ai      .wf-ico { background: var(--violet); color: var(--paper); }
+  .wf-node.wf-notify  .wf-ico { background: var(--cyan); }
+  .wf-node.wf-sheet   .wf-ico { background: var(--acid); }
+
+  /* States */
+  .wf-node.running {
+    border-color: var(--hot);
+    box-shadow: 0 0 0 3px rgba(234,75,113,0.12), 0 10px 30px rgba(234,75,113,0.2);
+    transform: translateY(-2px);
+  }
+  .wf-node.running .wf-status { color: var(--hot); }
+  .wf-node.running .wf-status .wf-dot {
+    background: var(--hot);
+    animation: dot-pulse 1s ease-in-out infinite;
+  }
+  @keyframes dot-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(234,75,113,0.7); }
+    50% { box-shadow: 0 0 0 6px rgba(234,75,113,0); }
+  }
+  .wf-node.done {
+    border-color: rgba(200,255,77,0.4);
+    background: linear-gradient(180deg, rgba(200,255,77,0.05), var(--ink-3));
+  }
+  .wf-node.done .wf-status { color: var(--acid); }
+  .wf-node.done .wf-status .wf-dot { background: var(--acid); }
+
+  /* Wire between nodes (rendered as a pseudo-element on each node's right side) */
+  .wf-node::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -16px;
+    width: 24px;
+    height: 2px;
+    background: var(--line-2);
+    z-index: -1;
+    transform: translateY(-50%);
+  }
+  .wf-node:last-child::after { display: none; }
+  .wf-node.done::after,
+  .wf-node.running ~ .wf-node::after { /* not used but kept for clarity */ }
+  .wf-node.wire-live::after {
+    background: linear-gradient(90deg, var(--hot), var(--hot-2));
+    box-shadow: 0 0 8px rgba(234,75,113,0.6);
+    animation: wire-flow 0.8s linear infinite;
+  }
+  @keyframes wire-flow {
+    0% { background-position: 0 0; }
+    100% { background-position: 24px 0; }
+  }
+
+  /* Data packet that flies along the wire */
+  .wf-packet {
+    position: absolute;
+    top: 50%;
+    right: -28px;
+    transform: translateY(-50%);
+    background: var(--hot);
+    color: var(--ink);
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 5;
+    box-shadow: 0 0 14px rgba(234,75,113,0.6);
+  }
+  .wf-node.wire-live .wf-packet {
+    animation: packet-fly 0.8s ease-in-out;
+  }
+  @keyframes packet-fly {
+    0% { opacity: 0; right: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; right: -50px; }
+  }
+
+  /* Caption bar below canvas */
+  .wf-caption {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--mute);
+    letter-spacing: .04em;
+    min-height: 24px;
+  }
+  .wf-caption .wf-step {
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .wf-caption .wf-step-no {
+    background: var(--hot);
+    color: var(--ink);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 10px; font-weight: 800;
+  }
+  .wf-caption .wf-step.idle { color: var(--mute); }
+  .wf-caption .wf-step.idle .wf-step-no {
+    background: var(--line-2); color: var(--paper-dim);
+  }
+  .wf-caption .wf-elapsed { color: var(--acid); }
+
+  @media (max-width: 900px) {
+    .wf-row {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .wf-node { margin: 0; }
+    .wf-node::after {
+      top: auto; bottom: -10px; right: 50%;
+      width: 2px; height: 14px;
+      transform: translateX(50%);
+    }
+    .wf-packet { display: none; }
   }
 
   /* ---------- shared text ---------- */
@@ -851,25 +1016,98 @@
     <div class="bar">
       <div class="left">
         <span class="dots"><span></span><span></span><span></span></span>
-        <span>workflow · new-customer-onboarding</span>
+        <span>workflow · <span class="wf-name">hot-lead-alert</span></span>
+        <span class="wf-status" id="wfStatus">active</span>
       </div>
       <button class="run-btn" id="runBtn"><span class="tri"></span> Click me — execute workflow</button>
     </div>
 
     <div class="canvas" id="canvas">
-      <svg class="wires" viewBox="0 0 1000 220" preserveAspectRatio="none">
-        <path id="w1" d="M 110 110 C 200 110, 240 110, 330 110" />
-        <path id="w2" d="M 330 110 C 430 110, 470 50, 600 50" />
-        <path id="w3" d="M 330 110 C 430 110, 470 170, 600 170" />
-        <path id="w4" d="M 600 50  C 720 50, 760 110, 880 110" />
-        <path id="w5" d="M 600 170 C 720 170, 760 110, 880 110" />
-      </svg>
+      <div class="wf-row" id="wfRow">
 
-      <div class="node trigger n1"><div class="ico">⚡</div><div class="label">Webhook</div><div class="sub">trigger</div></div>
-      <div class="node action n2"><div class="ico">{ }</div><div class="label">HubSpot</div><div class="sub">get contact</div></div>
-      <div class="node logic n3"><div class="ico">?</div><div class="label">IF</div><div class="sub">plan = pro</div></div>
-      <div class="node logic n4"><div class="ico">@</div><div class="label">Slack</div><div class="sub">notify-cs</div></div>
-      <div class="node out n5"><div class="ico">▤</div><div class="label">Google Sheet</div><div class="sub">append row</div></div>
+        <div class="wf-node wf-trigger" data-step="1">
+          <div class="wf-head">
+            <div class="wf-ico">⚡</div>
+            <div class="wf-meta">
+              <div class="wf-name">Webhook</div>
+              <div class="wf-type">Trigger</div>
+            </div>
+          </div>
+          <div class="wf-desc">Receives <code>POST</code> to <code>/lead-form</code> with name, company, budget, message.</div>
+          <div class="wf-status" data-default="idle">
+            <span class="wf-dot"></span><span class="wf-msg">idle</span>
+          </div>
+          <div class="wf-packet">1 item</div>
+        </div>
+
+        <div class="wf-node wf-logic" data-step="2">
+          <div class="wf-head">
+            <div class="wf-ico">?</div>
+            <div class="wf-meta">
+              <div class="wf-name">If</div>
+              <div class="wf-type">Logic · branch</div>
+            </div>
+          </div>
+          <div class="wf-desc">Keep only leads where <code>budget &gt; 5000</code>. Drop everything else.</div>
+          <div class="wf-status" data-default="idle">
+            <span class="wf-dot"></span><span class="wf-msg">idle</span>
+          </div>
+          <div class="wf-packet">✓ 8000</div>
+        </div>
+
+        <div class="wf-node wf-ai" data-step="3">
+          <div class="wf-head">
+            <div class="wf-ico">✦</div>
+            <div class="wf-meta">
+              <div class="wf-name">OpenAI</div>
+              <div class="wf-type">AI · gpt-4o-mini</div>
+            </div>
+          </div>
+          <div class="wf-desc">Reads the message; returns a <code>2-sentence</code> summary plus a next-step suggestion.</div>
+          <div class="wf-status" data-default="idle">
+            <span class="wf-dot"></span><span class="wf-msg">idle</span>
+          </div>
+          <div class="wf-packet">+ summary</div>
+        </div>
+
+        <div class="wf-node wf-notify" data-step="4">
+          <div class="wf-head">
+            <div class="wf-ico">@</div>
+            <div class="wf-meta">
+              <div class="wf-name">Slack</div>
+              <div class="wf-type">Action · message</div>
+            </div>
+          </div>
+          <div class="wf-desc">Posts a rich alert to <code>#sales-hot-leads</code> with lead info + AI summary.</div>
+          <div class="wf-status" data-default="idle">
+            <span class="wf-dot"></span><span class="wf-msg">idle</span>
+          </div>
+          <div class="wf-packet">msg sent</div>
+        </div>
+
+        <div class="wf-node wf-sheet" data-step="5">
+          <div class="wf-head">
+            <div class="wf-ico">▤</div>
+            <div class="wf-meta">
+              <div class="wf-name">Google Sheets</div>
+              <div class="wf-type">Action · append</div>
+            </div>
+          </div>
+          <div class="wf-desc">Adds a row to <code>leads_2026</code> for tracking, dashboards, and reporting.</div>
+          <div class="wf-status" data-default="idle">
+            <span class="wf-dot"></span><span class="wf-msg">idle</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="wf-caption">
+        <div class="wf-step idle" id="wfCaption">
+          <span class="wf-step-no">▶</span>
+          <span id="wfCaptionText">Press "Click me" above to see the workflow execute end-to-end</span>
+        </div>
+        <div class="wf-elapsed" id="wfElapsed"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -3251,40 +3489,77 @@ Return ONLY two sentences:
 
 <script>
   // ============== Play the demo workflow ==============
-  const runBtn = document.getElementById('runBtn');
-  const wires  = ['w1','w2','w3','w4','w5'].map(id => document.getElementById(id));
-  const nodes  = Array.from(document.querySelectorAll('#canvas .node'));
+  const runBtn       = document.getElementById('runBtn');
+  const wfNodes      = Array.from(document.querySelectorAll('.wf-node'));
+  const wfCaption    = document.getElementById('wfCaption');
+  const wfCaptionTxt = document.getElementById('wfCaptionText');
+  const wfElapsed    = document.getElementById('wfElapsed');
 
-  function reset() {
-    wires.forEach(w => w.classList.remove('active'));
-    nodes.forEach(n => n.classList.remove('lit'));
+  const steps = [
+    { msg: 'Step 1 of 5 — Webhook receives form submission',  done: 'received { name, company, budget: 8000, message }' },
+    { msg: 'Step 2 of 5 — If node checks: is budget > 5000?', done: '8000 > 5000 — passing item to TRUE branch' },
+    { msg: 'Step 3 of 5 — OpenAI summarizing the message',    done: 'AI returned 2-sentence summary' },
+    { msg: 'Step 4 of 5 — Slack posting to #sales-hot-leads', done: 'message_ts 1716543210.0001' },
+    { msg: 'Step 5 of 5 — Google Sheets appending row',       done: 'row 47 appended · execution complete' }
+  ];
+
+  function resetWF() {
+    wfNodes.forEach(n => {
+      n.classList.remove('running', 'done', 'wire-live');
+      const msg = n.querySelector('.wf-msg');
+      if (msg) msg.textContent = 'idle';
+    });
+    wfCaption.classList.add('idle');
+    wfCaption.querySelector('.wf-step-no').textContent = '▶';
+    wfCaptionTxt.textContent = 'Press "Click me" above to see the workflow execute end-to-end';
+    wfElapsed.textContent = '';
   }
 
-  async function play() {
-    reset();
+  async function playWF() {
+    resetWF();
     runBtn.disabled = true;
-    const seq = [
-      { node: 0, wire: null },
-      { node: 1, wire: 0 },
-      { node: 2, wire: 1 },
-      { node: 3, wire: 2 },
-      { node: 4, wire: 3 }
-    ];
-    for (let i = 0; i < seq.length; i++) {
-      const s = seq[i];
-      if (s.wire !== null) wires[s.wire].classList.add('active');
-      nodes[s.node].classList.add('lit');
-      await new Promise(r => setTimeout(r, 650));
+    wfCaption.classList.remove('idle');
+    const start = Date.now();
+
+    for (let i = 0; i < wfNodes.length; i++) {
+      const node = wfNodes[i];
+      // Mark this step in caption
+      wfCaption.querySelector('.wf-step-no').textContent = (i + 1);
+      wfCaptionTxt.textContent = steps[i].msg;
+
+      // Set node to running
+      node.classList.add('running');
+      const msg = node.querySelector('.wf-msg');
+      msg.textContent = 'running…';
+
+      // Brief processing time
+      await new Promise(r => setTimeout(r, 750));
+
+      // Mark done with output preview
+      node.classList.remove('running');
+      node.classList.add('done');
+      msg.textContent = steps[i].done.length > 38 ? steps[i].done.substring(0, 36) + '…' : steps[i].done;
+
+      // Light up the wire to the next node + send a data packet
+      if (i < wfNodes.length - 1) {
+        node.classList.add('wire-live');
+        await new Promise(r => setTimeout(r, 600));
+        node.classList.remove('wire-live');
+      }
     }
-    wires[4].classList.add('active');
-    await new Promise(r => setTimeout(r, 600));
-    await new Promise(r => setTimeout(r, 1200));
-    reset();
+
+    const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+    wfElapsed.textContent = `✓ completed in ${elapsed}s`;
+    wfCaption.querySelector('.wf-step-no').textContent = '✓';
+    wfCaptionTxt.textContent = 'Execution finished — 5/5 nodes ok, 1 row written, 1 message sent';
+
+    await new Promise(r => setTimeout(r, 3500));
+    resetWF();
     runBtn.disabled = false;
   }
 
-  runBtn.addEventListener('click', play);
-  window.addEventListener('load', () => setTimeout(play, 900));
+  runBtn.addEventListener('click', playWF);
+  window.addEventListener('load', () => setTimeout(playWF, 900));
 
   // ============== Tabs ==============
   const tabs = document.querySelectorAll('.tab');
