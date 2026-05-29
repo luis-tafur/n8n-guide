@@ -1787,10 +1787,11 @@
 
   .bigstep-body {
     display: grid;
-    grid-template-columns: 1fr 1.05fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     gap: 36px;
     align-items: start;
   }
+  .bigstep-body > div { min-width: 0; }
   @media (max-width: 1000px) { .bigstep-body { grid-template-columns: 1fr; gap: 22px; } }
 
   .substeps {
@@ -1937,9 +1938,12 @@
 
   .screen-body {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 220px minmax(0, 1fr);
     min-height: 420px;
   }
+  .screen-body > * { min-width: 0; }
+  .screen { min-width: 0; max-width: 100%; }
+  .screen-canvas { overflow: hidden; }
   .screen-sidebar {
     background: #0c0c14;
     border-right: 1px solid var(--line);
@@ -2028,7 +2032,7 @@
   }
   .field {
     display: grid;
-    grid-template-columns: 130px 1fr;
+    grid-template-columns: 130px minmax(0, 1fr);
     gap: 12px;
     padding: 9px 0;
     border-bottom: 1px dashed var(--line);
@@ -2045,6 +2049,9 @@
     font-size: 12.5px; color: var(--paper);
     font-family: 'JetBrains Mono', monospace;
     display: flex; justify-content: space-between; align-items: center;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .field .val.exp { color: var(--acid); border-color: rgba(200,255,77,0.3); background: rgba(200,255,77,0.05); }
   .field .val.exp::after { content: "{ }"; color: var(--mute); font-size: 10px; }
@@ -2130,11 +2137,25 @@
   .callout {
     margin-top: 22px;
     border-radius: var(--r);
-    padding: 18px 22px;
+    padding: 18px 22px 18px 60px;
     font-size: 14px;
     line-height: 1.6;
     position: relative;
-    padding-left: 60px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .callout code {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--acid);
+    background: var(--ink);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .callout::before {
     position: absolute;
@@ -2179,6 +2200,11 @@
     color: var(--paper-dim);
     overflow-x: auto;
     position: relative;
+    min-width: 0;
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .testcmd::before {
     content: "$ test request";
