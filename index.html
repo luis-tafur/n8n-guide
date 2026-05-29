@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>n8n · The Vibe Coder's Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@300;400;500;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:        #0b0b10;
+    --ink-2:      #111118;
+    --ink-3:      #1a1a24;
+    --line:       #26263a;
+    --line-2:     #353550;
+    --paper:      #f4efe6;
+    --paper-dim:  #cfc7b8;
+    --mute:       #6b6b85;
+    --hot:        #ea4b71;
+    --hot-2:      #ff7a99;
+    --acid:       #c8ff4d;
+    --amber:      #f6b15a;
+    --cyan:       #6ad7e5;
+    --violet:     #8b7cf6;
+
+    --grid:       rgba(255,255,255,0.045);
+    --grid-dot:   rgba(255,255,255,0.10);
+
+    --r-sm: 6px;
+    --r:    14px;
+    --r-lg: 22px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Manrope', system-ui, sans-serif;
+    background: var(--ink);
+    color: var(--paper);
+    line-height: 1.6;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+
+  ::selection { background: var(--hot); color: var(--ink); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--line-2); }
+
+  .serif { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .mono  { font-family: 'JetBrains Mono', monospace; }
+
+  h1,h2,h3,h4 { font-family: 'Fraunces', serif; font-weight: 400; letter-spacing: -0.02em; line-height: 1.04; margin: 0; }
+  h1 { font-size: clamp(54px, 9.5vw, 140px); font-variation-settings: 'opsz' 144; }
+  h2 { font-size: clamp(34px, 5vw, 70px); font-variation-settings: 'opsz' 72; }
+  h3 { font-size: clamp(22px, 2.4vw, 32px); }
+  h4 { font-size: 18px; letter-spacing: 0; }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  small, .small { font-size: 12.5px; }
+
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+  section { padding: 110px 0; position: relative; }
+  section + section { border-top: 1px solid var(--line); }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--hot);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--hot); }
+
+  /* ---------- nav ---------- */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 18px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: blur(14px);
+    background: rgba(11,11,16,0.55);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top .brand {
+    font-family: 'Fraunces', serif; font-size: 22px;
+    font-style: italic;
+    display: flex; align-items: center; gap: 12px;
+  }
+  nav.top .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--hot);
+    box-shadow: 0 0 14px var(--hot);
+  }
+  nav.top .links { display: flex; gap: 22px; flex-wrap: wrap; }
+  nav.top .links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; color: var(--paper-dim);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    transition: color .2s;
+  }
+  nav.top .links a:hover { color: var(--hot); }
+  @media (max-width: 900px) { nav.top .links { display: none; } }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    min-height: 100vh;
+    padding-top: 140px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 60px;
+    align-content: center;
+    position: relative;
+  }
+  .hero-title h1 { color: var(--paper); }
+  .hero-title h1 em { font-style: italic; color: var(--hot); font-variation-settings: 'opsz' 144; }
+  .hero-title .slash { color: var(--line-2); font-style: normal; padding: 0 .1em; }
+  .hero-sub {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 50px;
+    max-width: 1100px;
+  }
+  .hero-sub .lead {
+    font-family: 'Fraunces', serif;
+    font-size: 22px; line-height: 1.45;
+    color: var(--paper-dim);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .hero-sub .meta { font-size: 14.5px; color: var(--mute); }
+  .hero-sub .meta b { color: var(--paper); font-weight: 500; }
+  .hero-sub .meta div + div { margin-top: 14px; }
+  @media (max-width: 720px) { .hero-sub { grid-template-columns: 1fr; gap: 28px; } }
+
+  /* Playable mini workflow */
+  .workflow-demo {
+    margin-top: 70px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
+    padding: 30px 24px 24px;
+    position: relative; overflow: hidden;
+  }
+  .workflow-demo::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    pointer-events: none; opacity: 0.7;
+  }
+  .workflow-demo .bar {
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative; z-index: 2; margin-bottom: 24px;
+  }
+  .workflow-demo .bar .left {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    color: var(--mute); text-transform: uppercase; letter-spacing: .15em;
+  }
+  .workflow-demo .bar .left .dots { display: inline-flex; gap: 6px; }
+  .workflow-demo .bar .left .dots span {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--line-2);
+  }
+  .workflow-demo .bar .left .dots span:nth-child(1){ background:#ef4444; }
+  .workflow-demo .bar .left .dots span:nth-child(2){ background:#f59e0b; }
+  .workflow-demo .bar .left .dots span:nth-child(3){ background:#10b981; }
+
+  .run-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    background: var(--hot); color: var(--ink);
+    border: none; padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .15s ease, box-shadow .2s;
+    font-weight: 700;
+  }
+  .run-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(234,75,113,0.35); }
+  .run-btn .tri {
+    width: 0; height: 0;
+    border-left: 7px solid var(--ink);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+
+  .canvas {
+    position: relative; height: 220px; z-index: 2;
+  }
+  .canvas svg.wires {
+    position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+  }
+  .canvas .node {
+    position: absolute;
+    width: 130px; padding: 14px 12px;
+    background: var(--ink-3);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r);
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; gap: 6px;
+    transition: transform .2s, box-shadow .25s, border-color .25s;
+  }
+  .canvas .node .ico {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--ink); font-weight: 800;
+  }
+  .canvas .node .label { font-size: 13px; font-weight: 600; }
+  .canvas .node .sub { font-size: 10.5px; color: var(--mute); font-family: 'JetBrains Mono', monospace; }
+  .canvas .node.lit { border-color: var(--hot); box-shadow: 0 0 0 4px rgba(234,75,113,0.12), 0 12px 40px rgba(234,75,113,0.25); transform: translate(-50%, -50%) scale(1.04); }
+
+  .node.trigger .ico { background: var(--hot); }
+  .node.action  .ico { background: var(--cyan); }
+  .node.logic   .ico { background: var(--amber); }
+  .node.out     .ico { background: var(--acid); }
+
+  .n1 { top: 50%; left: 9%; }
+  .n2 { top: 50%; left: 33%; }
+  .n3 { top: 22%; left: 60%; }
+  .n4 { top: 78%; left: 60%; }
+  .n5 { top: 50%; left: 88%; }
+
+  .wires path {
+    stroke: var(--line-2); stroke-width: 2; fill: none;
+    stroke-dasharray: 6 6;
+  }
+  .wires path.active {
+    stroke: var(--hot);
+    stroke-dasharray: 8 8;
+    animation: dash 1s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(234,75,113,0.6));
+  }
+  @keyframes dash { to { stroke-dashoffset: -28; } }
+
+  @media (max-width: 720px) {
+    .canvas { height: auto; min-height: 360px; }
+    .n1 { top: 8%;  left: 50%; }
+    .n2 { top: 30%; left: 50%; }
+    .n3 { top: 54%; left: 28%; }
+    .n4 { top: 54%; left: 72%; }
+    .n5 { top: 90%; left: 50%; }
+  }
+
+  /* ---------- shared text ---------- */
+  .twocol {
+    display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .twocol { grid-template-columns: 1fr; gap: 36px; } }
+  .twocol h2 em { color: var(--hot); font-style: italic; }
+  .twocol .body p { font-size: 17px; color: var(--paper-dim); margin-top: 22px; }
+  .twocol .body p strong { color: var(--paper); font-weight: 600; }
+  .twocol .body p .hl { color: var(--hot); }
+
+  .prose p { color: var(--paper-dim); font-size: 17px; margin-top: 22px; max-width: 800px; }
+  .prose p strong { color: var(--paper); font-weight: 600; }
+  .prose p .hl { color: var(--hot); }
+  .prose p a { color: var(--cyan); border-bottom: 1px dashed var(--line-2); }
+
+  code.inline {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--acid);
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 0.86em;
+  }
+
+  /* analogy box */
+  .analogy {
+    margin-top: 36px;
+    border: 1px dashed var(--line-2);
+    border-radius: var(--r);
+    padding: 24px 28px;
+    background: rgba(255,255,255,0.015);
+    position: relative;
+  }
+  .analogy::before {
+    content: "ANALOGY";
+    position: absolute; top: -10px; left: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .2em;
+    color: var(--amber);
+    background: var(--ink);
+    padding: 0 10px;
+  }
+  .analogy p { color: var(--paper); font-family: 'Fraunces', serif; font-style: italic; font-size: 19px; line-height: 1.5; }
+  .analogy.cyan::before { color: var(--cyan); }
+  .analogy.violet::before { color: var(--violet); content: "PLAIN ENGLISH"; }
+
+  /* number pillars */
+  .pillars { margin-top: 50px; display: grid; gap: 14px; }
+  .pillar {
+    display: grid; grid-template-columns: 60px 1fr; align-items: center;
+    border-top: 1px solid var(--line); padding: 22px 0;
+  }
+  .pillar .num { font-family: 'Fraunces', serif; font-style: italic; font-size: 36px; color: var(--hot); }
+  .pillar h4 { font-family: 'Manrope'; font-weight: 600; font-size: 17px; }
+  .pillar .desc { color: var(--mute); font-size: 14.5px; margin-top: 4px; }
+
+  /* concepts grid */
+  .concepts { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-top: 60px; }
+  .concept {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 26px 24px;
+    position: relative; overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .concept:hover { border-color: var(--line-2); transform: translateY(-3px); }
+  .concept .tag {
+    position: absolute; top: 18px; right: 18px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--mute); letter-spacing: .14em; text-transform: uppercase;
+  }
+  .concept .ico-big {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: grid; place-items: center; margin-bottom: 18px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 800;
+    color: var(--ink);
+  }
+  .concept h3 { font-family: 'Fraunces', serif; font-size: 28px; }
+  .concept p { color: var(--paper-dim); font-size: 14.5px; margin-top: 10px; }
+  .concept .think {
+    margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line);
+    font-size: 13px; color: var(--mute); font-family: 'JetBrains Mono', monospace;
+  }
+  .concept .think b { color: var(--amber); font-weight: 400; }
+
+  .concept.c-trigger { grid-column: span 5; }
+  .concept.c-node    { grid-column: span 7; }
+  .concept.c-conn    { grid-column: span 4; }
+  .concept.c-exec    { grid-column: span 4; }
+  .concept.c-cred    { grid-column: span 4; }
+
+  .concept.c-trigger .ico-big { background: var(--hot); }
+  .concept.c-node    .ico-big { background: var(--cyan); }
+  .concept.c-conn    .ico-big { background: var(--amber); }
+  .concept.c-exec    .ico-big { background: var(--acid); }
+  .concept.c-cred    .ico-big { background: var(--violet); color: var(--paper); }
+  @media (max-width: 900px) { .concepts > * { grid-column: span 12 !important; } }
+
+  /* setup steps */
+  .setup-options {
+    margin-top: 50px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 800px) { .setup-options { grid-template-columns: 1fr; } }
+  .option {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 30px;
+    position: relative;
+  }
+  .option.featured { border-color: var(--hot); }
+  .option .pickme {
+    position: absolute; top: -11px; left: 24px;
+    background: var(--hot); color: var(--ink);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: .14em; padding: 4px 10px; border-radius: 4px;
+    font-weight: 700;
+  }
+  .option h3 { font-size: 28px; }
+  .option .price { font-family: 'JetBrains Mono', monospace; color: var(--acid); font-size: 13.5px; margin-top: 6px; }
+  .option ul { margin: 22px 0 0 0; padding: 0; list-style: none; }
+  .option ul li {
+    padding: 10px 0 10px 26px;
+    color: var(--paper-dim); font-size: 14.5px;
+    border-top: 1px dashed var(--line);
+    position: relative;
+  }
+  .option ul li:first-of-type { border-top: 0; }
+  .option ul li::before {
+    content: "→"; position: absolute; left: 0; color: var(--hot);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .option ul li.no::before { content: "✕"; color: var(--mute); }
+
+  /* UI tour */
+  .ui-tour {
+    margin-top: 50px;
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: 30px;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;
+  }
+  @media (max-width: 900px) { .ui-tour { grid-template-columns: 1fr; } }
+  .ui-mock {
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--paper-dim);
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 18px 18px;
+    min-height: 380px;
+    position: relative;
+  }
+  .ui-mock .mockbar {
+    display: flex; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .ui-mock .mockbar span {
+    background: var(--ink-3); padding: 4px 10px; border-radius: 4px;
+    font-size: 10.5px; color: var(--mute);
+  }
+  .ui-mock .mockbar span.active { background: var(--hot); color: var(--ink); }
+  .ui-mock .zone {
+    position: absolute;
+    border: 1.5px dashed var(--hot);
+    border-radius: 8px;
+    background: rgba(234,75,113,0.07);
+    padding: 6px 10px;
+    color: var(--paper);
+    font-size: 10.5px;
+  }
+  .ui-mock .zone.z1 { top: 70px; left: 30px; width: 100px; height: 200px; }
+  .ui-mock .zone.z2 { top: 70px; left: 150px; right: 30px; height: 200px; display:grid; place-items:center; }
+  .ui-mock .zone.z3 { top: 290px; left: 30px; right: 30px; height: 70px; }
+  .ui-tour-list ol {
+    counter-reset: tour;
+    padding: 0; margin: 0; list-style: none;
+  }
+  .ui-tour-list ol li {
+    counter-increment: tour;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    color: var(--paper-dim);
+    font-size: 14.5px;
+    display: grid; grid-template-columns: 36px 1fr; gap: 14px;
+  }
+  .ui-tour-list ol li:first-child { border-top: 0; }
+  .ui-tour-list ol li::before {
+    content: counter(tour, decimal-leading-zero);
+    font-family: 'Fraunces', serif; font-style: italic;
+    color: var(--hot); font-size: 22px;
+  }
+  .ui-tour-list ol li b { color: var(--paper); font-weight: 600; display:block; margin-bottom: 4px; font-family:'Manrope',sans-serif;}
+
+  /* tabs */
+  .tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--line);
+    margin-top: 50px; overflow-x: auto;
+  }
+  .tab {
+    padding: 18px 22px;
+    background: transparent; border: none;
+    color: var(--mute); cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .2s, border-color .2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--paper); }
+  .tab.active { color: var(--hot); border-bottom-color: var(--hot); }
+  .tab-panel { display: none; padding: 40px 0; }
+  .tab-panel.active { display: grid; grid-template-columns: 1fr 1.3fr; gap: 60px; }
+  @media (max-width: 900px) { .tab-panel.active { grid-template-columns: 1fr; gap: 28px; } }
+  .tab-panel h3 { font-size: 38px; }
+  .tab-panel h3 em { color: var(--hot); font-style: italic; }
+  .tab-panel .panel-lead { color: var(--paper-dim); margin-top: 16px; font-size: 16px; }
+  .examples { display: grid; gap: 10px; }
+  .example {
+    display: grid; grid-template-columns: 36px 1fr auto;
+    align-items: center; gap: 16px;
+    padding: 16px 18px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    transition: border-color .15s, background .15s;
+  }
+  .example:hover { border-color: var(--line-2); background: var(--ink-3); }
+  .example .pill {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: grid; place-items: center; color: var(--ink);
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;
+  }
+  .example .name { font-weight: 600; font-size: 15px; }
+  .example .desc { color: var(--mute); font-size: 13px; margin-top: 2px; }
+  .example .badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--mute); letter-spacing: .12em; text-transform: uppercase;
+  }
+
+  /* expressions */
+  .expr { margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .expr { grid-template-columns: 1fr; } }
+  .expr-card {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 22px;
+  }
+  .expr-card .ttl {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .expr-card .ttl h4 { font-family: 'Fraunces', serif; font-style: italic; color: var(--hot); font-size: 22px; }
+  .expr-card pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--ink); border: 1px solid var(--line);
+    padding: 14px 16px; border-radius: var(--r-sm);
+    font-size: 13.5px; overflow-x: auto;
+    margin: 0; color: var(--acid);
+  }
+  .expr-card .note { font-size: 13.5px; color: var(--paper-dim); margin-top: 12px; line-height: 1.55; }
+  .expr-card .english {
+    margin-top: 10px;
+    font-size: 13px; color: var(--cyan);
+    font-family: 'Fraunces', serif; font-style: italic;
+  }
+  .expr-card .english::before { content: "🗣 in english: "; color: var(--mute); font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;}
+  .copy {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: .12em; text-transform: uppercase;
+    background: transparent; color: var(--mute);
+    border: 1px solid var(--line);
+    padding: 6px 10px; border-radius: 999px;
+    cursor: pointer; transition: all .15s;
+  }
+  .copy:hover { color: var(--hot); border-color: var(--hot); }
+  .copy.copied { background: var(--hot); color: var(--ink); border-color: var(--hot); }
+
+  /* first workflow steps */
+  .steps {
+    margin-top: 50px;
+    display: grid; gap: 0;
+    counter-reset: step;
+  }
+  .step {
+    display: grid; grid-template-columns: 120px 1fr 1.3fr;
+    gap: 40px;
+    padding: 36px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+    counter-increment: step;
+  }
+  .step:last-child { border-bottom: 1px solid var(--line); }
+  .step .num {
+    font-family: 'Fraunces', serif;
+    font-size: 84px; line-height: 1; color: var(--hot);
+    font-style: italic;
+  }
+  .step .num::before { content: counter(step, decimal-leading-zero); }
+  .step h3 { font-size: 28px; }
+  .step .body p { color: var(--paper-dim); margin-top: 10px; font-size: 15px; line-height: 1.6; }
+  .step .body p + p { margin-top: 14px; }
+  .step .body .tipline {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--amber);
+    border-left: 2px solid var(--amber);
+    padding-left: 12px;
+    line-height: 1.55;
+  }
+  .step .visual {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 18px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--paper-dim);
+  }
+  .step .visual .row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;}
+  .step .visual .row:last-child { margin-bottom: 0; }
+  .step .visual .k { color: var(--hot); }
+  .step .visual .v { color: var(--acid); }
+  .step .visual .c { color: var(--mute); }
+  .step .visual .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); }
+  @media (max-width: 900px) {
+    .step { grid-template-columns: 1fr; gap: 14px; }
+    .step .num { font-size: 56px; }
+  }
+
+  /* recipes */
+  .recipes { margin-top: 50px; display: grid; gap: 26px; }
+  .recipe {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 30px;
+    display: grid; grid-template-columns: 1fr 1.4fr; gap: 40px;
+  }
+  @media (max-width: 900px) { .recipe { grid-template-columns: 1fr; gap: 22px; } }
+  .recipe .head h3 { font-family: 'Fraunces', serif; font-style: italic; font-size: 30px; color: var(--paper); }
+  .recipe .head h3 em { color: var(--hot); }
+  .recipe .head .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .recipe .head .badge-row span {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: .14em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px;
+    background: var(--ink-3); color: var(--paper-dim); border: 1px solid var(--line);
+  }
+  .recipe .head .when {
+    margin-top: 18px; color: var(--paper-dim); font-size: 14.5px; line-height: 1.55;
+  }
+  .recipe .flow {
+    background: var(--ink); border: 1px solid var(--line);
+    border-radius: var(--r-sm); padding: 18px;
+  }
+  .recipe .flow .line {
+    display: grid; grid-template-columns: 28px 100px 1fr;
+    gap: 10px; align-items: center;
+    padding: 10px 0; border-top: 1px dashed var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+  }
+  .recipe .flow .line:first-child { border-top: 0; }
+  .recipe .flow .line .ix { color: var(--mute); }
+  .recipe .flow .line .nd { color: var(--hot); font-weight: 700; }
+  .recipe .flow .line .ds { color: var(--paper-dim); }
+
+  /* patterns */
+  .patterns { margin-top: 50px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 800px) { .patterns { grid-template-columns: 1fr; } }
+  .pattern {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 28px;
+    transition: border-color .2s, transform .2s;
+    position: relative; overflow: hidden;
+  }
+  .pattern:hover { border-color: var(--hot); transform: translateY(-3px); }
+  .pattern .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .pattern .ico-mini {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 14px;
+    color: var(--ink); flex-shrink: 0;
+  }
+  .pattern h4 { font-family: 'Fraunces', serif; font-style: italic; font-size: 26px; color: var(--paper); }
+  .pattern .tag-line {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mute);
+    letter-spacing: .14em; text-transform: uppercase; margin-top: 4px;
+  }
+  .pattern p { color: var(--paper-dim); font-size: 14.5px; margin-top: 16px; line-height: 1.55; }
+  .pattern .use {
+    margin-top: 18px; padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    font-size: 13px; color: var(--mute);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pattern .use b { color: var(--acid); font-weight: 400; }
+
+  .pattern:nth-child(1) .ico-mini { background: var(--amber); }
+  .pattern:nth-child(2) .ico-mini { background: var(--cyan); }
+  .pattern:nth-child(3) .ico-mini { background: var(--violet); color: var(--paper); }
+  .pattern:nth-child(4) .ico-mini { background: var(--hot); }
+  .pattern:nth-child(5) .ico-mini { background: var(--acid); }
+  .pattern:nth-child(6) .ico-mini { background: var(--paper); }
+
+  /* error decoder */
+  .errors { margin-top: 50px; display: grid; gap: 14px; }
+  .err {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 24px;
+  }
+  @media (max-width: 800px) { .err { grid-template-columns: 1fr; gap: 10px; } }
+  .err .msg {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--hot-2); font-size: 13.5px;
+    background: rgba(234,75,113,0.08);
+    border: 1px solid rgba(234,75,113,0.25);
+    border-radius: 6px; padding: 12px 14px;
+  }
+  .err .msg::before { content: "⚠ "; color: var(--hot); }
+  .err .fix { font-size: 14.5px; color: var(--paper-dim); line-height: 1.6; }
+  .err .fix b { color: var(--acid); font-weight: 600; }
+
+  /* tips */
+  .tips { margin-top: 50px; display: grid; gap: 0; }
+  .tip {
+    display: grid; grid-template-columns: 80px 1fr;
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    align-items: start; gap: 24px;
+  }
+  .tip:last-child { border-bottom: 1px solid var(--line); }
+  .tip .kind {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase;
+    padding: 4px 8px; border-radius: 4px;
+    display: inline-block; height: fit-content; width: fit-content;
+  }
+  .tip.do  .kind { background: rgba(200,255,77,0.18); color: var(--acid); }
+  .tip.dont .kind { background: rgba(234,75,113,0.18); color: var(--hot-2); }
+  .tip.wow  .kind { background: rgba(106,215,229,0.18); color: var(--cyan); }
+  .tip h4 { font-family: 'Manrope'; font-weight: 600; font-size: 17px; }
+  .tip p { color: var(--paper-dim); margin-top: 6px; font-size: 14.5px; line-height: 1.55; }
+  .tip code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    background: var(--ink-2); border: 1px solid var(--line);
+    padding: 2px 6px; border-radius: 4px; color: var(--acid);
+  }
+
+  /* AI section */
+  .ai-grid { margin-top: 50px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .ai-grid { grid-template-columns: 1fr; } }
+  .ai-card {
+    background: linear-gradient(180deg, rgba(139,124,246,0.08), transparent), var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 26px;
+  }
+  .ai-card .ai-ico {
+    width: 40px; height: 40px; border-radius: 9px;
+    background: var(--violet); color: var(--paper);
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 16px;
+    margin-bottom: 18px;
+  }
+  .ai-card h4 { font-family: 'Fraunces', serif; font-style: italic; font-size: 24px; color: var(--paper); }
+  .ai-card p { margin-top: 10px; color: var(--paper-dim); font-size: 14.5px; line-height: 1.55; }
+
+  /* glossary */
+  .gloss {
+    margin-top: 50px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0 50px;
+  }
+  @media (max-width: 800px) { .gloss { grid-template-columns: 1fr; } }
+  .gloss dt {
+    font-family: 'Fraunces', serif; font-style: italic;
+    color: var(--hot); font-size: 19px;
+    margin-top: 18px;
+  }
+  .gloss dd {
+    margin: 4px 0 0; color: var(--paper-dim); font-size: 14.5px;
+    padding-bottom: 18px; border-bottom: 1px solid var(--line); line-height: 1.55;
+  }
+  .gloss dd b { color: var(--paper); font-weight: 600; }
+
+  /* footer */
+  footer {
+    padding: 90px 0 60px;
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, transparent, rgba(234,75,113,0.06));
+  }
+  footer .row1 {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 40px; flex-wrap: wrap;
+  }
+  footer h2 { font-size: clamp(48px, 7vw, 96px); }
+  footer h2 em { color: var(--hot); font-style: italic; }
+  footer .row2 {
+    margin-top: 60px;
+    display: flex; justify-content: space-between;
+    border-top: 1px solid var(--line); padding-top: 24px;
+    color: var(--mute); font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .links-cluster {
+    margin-top: 36px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .link-card {
+    background: var(--ink-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 18px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    transition: border-color .2s, background .2s; cursor: pointer;
+  }
+  .link-card:hover { border-color: var(--hot); background: var(--ink-3); }
+  .link-card .lk { font-family: 'Fraunces', serif; font-style: italic; font-size: 19px; }
+  .link-card .ar { color: var(--hot); font-size: 20px; }
+
+  /* fade in */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rise { animation: rise .9s cubic-bezier(.2,.7,.2,1) both; }
+  .rise.d1 { animation-delay: .08s; }
+  .rise.d2 { animation-delay: .16s; }
+  .rise.d3 { animation-delay: .24s; }
+  .rise.d4 { animation-delay: .32s; }
+
+  .toc-jump {
+    margin-top: 36px; display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .toc-jump a {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: .14em; text-transform: uppercase;
+    border: 1px solid var(--line); padding: 8px 14px; border-radius: 999px;
+    color: var(--paper-dim); transition: all .2s;
+  }
+  .toc-jump a:hover { border-color: var(--hot); color: var(--hot); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="brand"><span class="dot"></span> n8n <span style="color:var(--mute); font-style:normal; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; padding-left:8px;">vibe coder guide</span></div>
+  <div class="links">
+    <a href="#what">What is it</a>
+    <a href="#setup">Setup</a>
+    <a href="#tour">UI tour</a>
+    <a href="#words">Jargon</a>
+    <a href="#anatomy">Anatomy</a>
+    <a href="#nodes">Nodes</a>
+    <a href="#expressions">Expressions</a>
+    <a href="#first">First flow</a>
+    <a href="#recipes">Recipes</a>
+    <a href="#ai">AI</a>
+    <a href="#errors">Errors</a>
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero container">
+  <div class="hero-title">
+    <span class="eyebrow rise">A no-bullsh*t guide for non-developers who want to build real things</span>
+    <h1 class="rise d1">
+      Make apps<br>
+      talk to <em>each other</em><span class="slash">/</span><br>
+      without writing <em>code</em>.
+    </h1>
+
+    <div class="hero-sub">
+      <p class="lead rise d2">
+        n8n (pronounced "n-eight-n", short for <i>nodemation</i>) is a visual canvas where you connect
+        boxes — and each box does something useful: send a Slack message, save a row in Google Sheets,
+        ask ChatGPT a question, post a tweet, query a database.
+      </p>
+      <div class="meta rise d3">
+        <div><b>Who this guide is for:</b> people who can describe what they want, but freeze when someone says "just run <code class="inline">npm install</code>".</div>
+        <div><b>What you'll be able to do after reading:</b> build your own automations — even fairly complex ones — without writing a single line of real code.</div>
+        <div><b>How long:</b> ~30 min read. Skim now, come back to sections as you build.</div>
+      </div>
+    </div>
+
+    <div class="toc-jump rise d4">
+      <a href="#what">1. What is n8n?</a>
+      <a href="#setup">2. Get it running</a>
+      <a href="#tour">3. Tour the editor</a>
+      <a href="#words">4. Words you'll hear</a>
+      <a href="#anatomy">5. The 5 parts</a>
+      <a href="#nodes">6. Node families</a>
+      <a href="#expressions">7. Expressions</a>
+      <a href="#first">8. Your first flow</a>
+      <a href="#recipes">9. Real recipes</a>
+      <a href="#patterns">10. Patterns</a>
+      <a href="#ai">11. AI in n8n</a>
+      <a href="#errors">12. Error decoder</a>
+      <a href="#tips">13. Pro tips</a>
+      <a href="#glossary">14. Glossary</a>
+    </div>
+  </div>
+
+  <!-- Playable mini workflow -->
+  <div class="workflow-demo rise d4">
+    <div class="bar">
+      <div class="left">
+        <span class="dots"><span></span><span></span><span></span></span>
+        <span>workflow · new-customer-onboarding</span>
+      </div>
+      <button class="run-btn" id="runBtn"><span class="tri"></span> Click me — execute workflow</button>
+    </div>
+
+    <div class="canvas" id="canvas">
+      <svg class="wires" viewBox="0 0 1000 220" preserveAspectRatio="none">
+        <path id="w1" d="M 110 110 C 200 110, 240 110, 330 110" />
+        <path id="w2" d="M 330 110 C 430 110, 470 50, 600 50" />
+        <path id="w3" d="M 330 110 C 430 110, 470 170, 600 170" />
+        <path id="w4" d="M 600 50  C 720 50, 760 110, 880 110" />
+        <path id="w5" d="M 600 170 C 720 170, 760 110, 880 110" />
+      </svg>
+
+      <div class="node trigger n1"><div class="ico">⚡</div><div class="label">Webhook</div><div class="sub">trigger</div></div>
+      <div class="node action n2"><div class="ico">{ }</div><div class="label">HubSpot</div><div class="sub">get contact</div></div>
+      <div class="node logic n3"><div class="ico">?</div><div class="label">IF</div><div class="sub">plan = pro</div></div>
+      <div class="node logic n4"><div class="ico">@</div><div class="label">Slack</div><div class="sub">notify-cs</div></div>
+      <div class="node out n5"><div class="ico">▤</div><div class="label">Google Sheet</div><div class="sub">append row</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ WHAT IS IT ============================ -->
+<section id="what" class="container">
+  <div class="twocol">
+    <div>
+      <span class="eyebrow">01 · What it actually is</span>
+      <h2 style="margin-top:24px;">It's <em>LEGO</em> for the internet.</h2>
+    </div>
+    <div class="body">
+      <p>
+        Imagine every app you use — Gmail, Slack, Notion, ChatGPT, Stripe, Shopify — has a
+        little door on the back that other software can knock on. That door is called an
+        <strong>API</strong>. n8n is a tool that lets you knock on those doors and pass
+        information between them. <span class="hl">No installing things. No terminal.
+        No coding.</span> You drag boxes around a screen and connect them with lines.
+      </p>
+      <p>
+        Each box is a <strong>node</strong>. A node represents one action: <i>"get the latest
+        emails from Gmail"</i>, <i>"send a message to a Slack channel"</i>, <i>"add a row to a
+        spreadsheet"</i>. You decide the order, you decide what happens when, and n8n runs the
+        whole thing for you — either when you click a button, on a schedule, or when
+        something triggers it (like a new sale on your store).
+      </p>
+
+      <div class="analogy">
+        <p>
+          Think of n8n as the kitchen of a restaurant. Each chef station (node) does one thing:
+          one chops vegetables, one grills, one plates. The recipe (workflow) tells them the
+          order. You — the head chef — design the recipe once, and then dinner gets made the
+          same way every night, automatically. You only step into the kitchen if something goes wrong.
+        </p>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar">
+          <div class="num">i.</div>
+          <div>
+            <h4>You can build real things, fast</h4>
+            <div class="desc">Most useful workflows take 15–60 min to build, including learning the relevant nodes for the first time.</div>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="num">ii.</div>
+          <div>
+            <h4>It speaks to 400+ apps natively</h4>
+            <div class="desc">Notion, Airtable, Slack, Gmail, Postgres, OpenAI, Anthropic, Stripe, Shopify, Discord, Twitter/X, YouTube, HubSpot, Salesforce, Linear, Jira… and if it's not in the list, the HTTP Request node talks to any API on the planet.</div>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="num">iii.</div>
+          <div>
+            <h4>You stay in control of your data</h4>
+            <div class="desc">You can run n8n on your own server (called "self-hosting") so the data flowing through your workflows never leaves machines you control. Or use their Cloud version if you don't want to deal with hosting.</div>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="num">iv.</div>
+          <div>
+            <h4>It's source-available + has a generous free tier</h4>
+            <div class="desc">Self-hosted = free forever for personal/internal use. Cloud has a free trial and paid plans from ~$20/mo. Either way, you're not locked in like with most SaaS tools.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SETUP ============================ -->
+<section id="setup" class="container">
+  <span class="eyebrow">02 · Getting it running</span>
+  <h2 style="margin-top:24px; max-width: 900px;">Two ways to start: <em>15 seconds</em>, or <em>15 minutes</em>.</h2>
+  <div class="prose">
+    <p>
+      Before you can do anything, you need a running n8n instance. There are two paths. If
+      you're brand new and just want to play, <strong>pick n8n Cloud</strong>. If you're
+      privacy-conscious or want to host on your own server, pick Self-host. <span class="hl">Both
+      give you the exact same product</span> — same editor, same nodes, same workflows.
+    </p>
+  </div>
+
+  <div class="setup-options">
+    <div class="option featured">
+      <span class="pickme">Recommended for vibe coders</span>
+      <h3>n8n Cloud</h3>
+      <div class="price">~$20/mo · 14-day free trial · no credit card required to start</div>
+      <ul>
+        <li>Sign up at <code class="inline">n8n.io</code>, click "Get started", you're in.</li>
+        <li>No installing anything. Works in your browser.</li>
+        <li>n8n handles updates, backups, and uptime for you.</li>
+        <li>Webhooks just work — you get a public URL automatically.</li>
+        <li class="no">You pay a monthly fee after the trial.</li>
+        <li class="no">Your workflow data lives on their servers (encrypted, but theirs).</li>
+      </ul>
+      <p style="margin-top: 22px; color: var(--paper-dim); font-size: 14px; font-family: 'Fraunces', serif; font-style: italic;">
+        Pick this if: you're trying n8n for the first time, you don't have a server, or you
+        just want things to work without thinking about infrastructure.
+      </p>
+    </div>
+
+    <div class="option">
+      <h3>Self-hosted</h3>
+      <div class="price">free · requires a server or fancy laptop · 15–60 min setup</div>
+      <ul>
+        <li>Run on your own computer, a $5/mo VPS (DigitalOcean, Hetzner), Railway, Render, Fly.io, etc.</li>
+        <li>Free forever for personal/internal use.</li>
+        <li>Your data never leaves your infrastructure.</li>
+        <li>You can install community nodes that aren't allowed in Cloud.</li>
+        <li class="no">You're responsible for updates, backups, SSL certificates.</li>
+        <li class="no">Webhooks need a public URL — extra config if running locally.</li>
+      </ul>
+      <p style="margin-top: 22px; color: var(--paper-dim); font-size: 14px; font-family: 'Fraunces', serif; font-style: italic;">
+        Easiest self-host path: <a href="https://railway.app" style="color:var(--cyan); border-bottom: 1px dashed var(--line-2);">Railway</a>
+        — click "Deploy n8n", give it a credit card, you're done in 3 minutes.
+      </p>
+    </div>
+  </div>
+
+  <div class="analogy violet" style="margin-top: 40px;">
+    <p>
+      "Self-hosting" sounds intimidating but in 2026 it just means: click "deploy this template"
+      on a service like Railway, type your email, give them a card, and 3 minutes later you have
+      a private n8n at <code class="inline">yourname.up.railway.app</code>. It costs about $5/month
+      and you own everything in it.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ UI TOUR ============================ -->
+<section id="tour" class="container">
+  <span class="eyebrow">03 · The editor</span>
+  <h2 style="margin-top:24px; max-width: 1000px;">A <em>tour</em> of the screen you'll be staring at.</h2>
+  <div class="prose">
+    <p>
+      When you open n8n, you'll see a big checkered canvas — like graph paper. That's where
+      your workflow lives. Around it, there are panels for the things you need: a list of
+      available nodes, your past executions, your saved credentials, and so on. Here's the
+      map:
+    </p>
+  </div>
+
+  <div class="ui-tour">
+    <div class="ui-mock">
+      <div class="mockbar">
+        <span class="active">Editor</span>
+        <span>Executions</span>
+        <span>Settings</span>
+      </div>
+      <div class="zone z1">① left rail<br><span style="color:var(--mute); font-size:9.5px;">workflows / credentials</span></div>
+      <div class="zone z2">② canvas (your workflow)<br><br><span style="color:var(--mute); font-size:9.5px;">+ press "tab" or click "+" to add nodes</span></div>
+      <div class="zone z3">③ inspector panel — opens when you click a node</div>
+    </div>
+    <div class="ui-tour-list">
+      <ol>
+        <li>
+          <div>
+            <b>Top bar</b>
+            Save, name your workflow, toggle Active/Inactive (the toggle that decides if your
+            workflow runs in real life or only when you click Execute), and the big "Execute workflow"
+            button.
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Left rail</b>
+            Your saved workflows, your credentials (API keys), templates, and the executions
+            log (history of every time your workflow ran).
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Canvas (the big middle)</b>
+            Where you build. Drag to pan, scroll to zoom, click any node to configure it.
+            Press <code class="inline">Tab</code> or click "+" anywhere to add a new node.
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Node inspector</b>
+            Opens when you click on a node. Three columns: INPUT (what data came in),
+            CONFIG (the form you fill in), OUTPUT (what data this node produced).
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Executions tab</b>
+            A historical log: every time your workflow ran, you can replay it, inspect what
+            happened in each node, see errors. Your best debugging tool.
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ JARGON ============================ -->
+<section id="words" class="container">
+  <span class="eyebrow">04 · Jargon, decoded</span>
+  <h2 style="margin-top:24px; max-width: 1000px;">Six <em>scary-sounding words</em> in plain English.</h2>
+  <div class="prose">
+    <p>
+      You don't need to know any of these deeply to start. But you'll see them in the UI
+      and in tutorials, so let's defuse them right now.
+    </p>
+  </div>
+
+  <div class="concepts">
+    <div class="concept c-trigger">
+      <span class="tag">word 01</span>
+      <div class="ico-big">{ }</div>
+      <h3>JSON</h3>
+      <p>
+        A way of writing structured data that humans and computers can both read. Looks like this:
+        <code class="inline">{ "name": "Lucy", "email": "lucy@x.com", "plan": "pro" }</code>.
+        That's it. Curly braces, "key": "value" pairs. n8n passes JSON between every node.
+      </p>
+      <div class="think"><b>Why you care:</b> every node you click in n8n shows the input and output as JSON. Reading it = knowing what's happening.</div>
+    </div>
+
+    <div class="concept c-node">
+      <span class="tag">word 02</span>
+      <div class="ico-big">⊕</div>
+      <h3>API (Application Programming Interface)</h3>
+      <p>
+        A scary name for a simple thing: it's <em>the way one piece of software talks to another</em>.
+        When n8n sends a message to Slack, it's calling Slack's API. The API has rules
+        ("here's what URL to use, here's what info to send"). Every modern app has one.
+      </p>
+      <div class="think"><b>Why you care:</b> 99% of n8n's job is calling APIs. Most n8n nodes are pre-wrapped APIs — you fill a form, n8n makes the call.</div>
+    </div>
+
+    <div class="concept c-conn">
+      <span class="tag">word 03</span>
+      <div class="ico-big">⚡</div>
+      <h3>Webhook</h3>
+      <p>
+        A public URL that, when something visits it (called "posting to it"), wakes up your
+        workflow. Stripe posts to your webhook when a customer pays. Typeform posts when
+        someone submits a form. You can think of it as a <em>doorbell</em> for your workflow.
+      </p>
+      <div class="think"><b>Why you care:</b> webhooks are how things outside n8n start your workflow in real-time. No waiting, no polling.</div>
+    </div>
+
+    <div class="concept c-exec">
+      <span class="tag">word 04</span>
+      <div class="ico-big">⟳</div>
+      <h3>Cron / Schedule</h3>
+      <p>
+        A nerdy word for "run this on a schedule". Cron expressions look like
+        <code class="inline">0 9 * * 1</code> (every Monday at 9am). n8n has a friendly UI
+        so you don't write that — you just pick "every day at 9am" from dropdowns.
+      </p>
+      <div class="think"><b>Why you care:</b> any "daily digest", "weekly report", "every 5 minutes check this" automation uses a Schedule trigger.</div>
+    </div>
+
+    <div class="concept c-cred">
+      <span class="tag">word 05</span>
+      <div class="ico-big">⚿</div>
+      <h3>Credentials</h3>
+      <p>
+        Your API keys / passwords / OAuth tokens — the proof to Slack, Notion, OpenAI etc.
+        that <em>you</em> are allowed to talk to them. n8n stores them encrypted, separate
+        from your workflows. You set them up once per service.
+      </p>
+      <div class="think"><b>Why you care:</b> first time you use a new node, you'll be asked to "create credentials". It's a one-time form per app — paste an API key or click "Sign in with…".</div>
+    </div>
+
+    <div class="concept" style="grid-column: span 12; background: linear-gradient(180deg, rgba(106,215,229,0.06), transparent), var(--ink-2);">
+      <span class="tag">word 06</span>
+      <div class="ico-big" style="background: var(--cyan);">⊟</div>
+      <h3>"Items" (this one is n8n-specific)</h3>
+      <p>
+        Inside n8n, every node receives and emits a <strong>list</strong> of things — called items.
+        If your trigger grabs 10 new Gmail messages, that's 10 items. The next node runs once
+        per item (unless you configure it otherwise). This is the single biggest "ah-ha" moment
+        when you learn n8n: <span class="hl">data flows as lists, not one-at-a-time.</span>
+      </p>
+      <div class="think"><b>Why you care:</b> 80% of confusion in n8n comes from "why is this node running 47 times?" Answer: because the previous node gave it 47 items.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ANATOMY ============================ -->
+<section id="anatomy" class="container">
+  <span class="eyebrow">05 · Anatomy of any workflow</span>
+  <h2 style="margin-top:24px; max-width: 1000px;">Every workflow is made of <em>the same 5 ingredients</em>.</h2>
+
+  <div class="prose">
+    <p>
+      Once you understand these five, you'll be able to read any n8n workflow you find on
+      the internet — even huge ones — without getting overwhelmed. There's nothing else.
+    </p>
+  </div>
+
+  <div class="concepts">
+    <div class="concept c-trigger">
+      <span class="tag">01 / Trigger</span>
+      <div class="ico-big">⚡</div>
+      <h3>The thing that says <em style="color:var(--hot); font-style:italic;">"go!"</em></h3>
+      <p>
+        Every workflow starts with one. <strong>Manual</strong> (you click a button),
+        <strong>Schedule</strong> (every Monday at 9am), <strong>Webhook</strong> (someone
+        submits a form), or <strong>App event</strong> (new email in Gmail, new row in Airtable,
+        new charge in Stripe). No trigger = the workflow never runs.
+      </p>
+      <div class="think"><b>Rule:</b> exactly one trigger per workflow.</div>
+    </div>
+
+    <div class="concept c-node">
+      <span class="tag">02 / Node (the worker bee)</span>
+      <div class="ico-big">{ }</div>
+      <h3>A box that <em style="color:var(--hot);">does one thing</em></h3>
+      <p>
+        "Send a Slack message". "Get the customer from HubSpot". "Add a row to a sheet".
+        "Ask GPT-4 a question". You add as many as you need, in any order. Most workflows
+        have 3–15 nodes. The biggest ones (like full AI agents) have 30+. The most useful
+        node is <code class="inline">HTTP Request</code> — it talks to any API in the world,
+        even ones n8n doesn't have a dedicated node for.
+      </p>
+      <div class="think"><b>Mindset:</b> one node = one verb. If you want to do two things, use two nodes.</div>
+    </div>
+
+    <div class="concept c-conn">
+      <span class="tag">03 / Connection</span>
+      <div class="ico-big">→</div>
+      <h3>The arrow that <em style="color:var(--hot);">passes the bag</em></h3>
+      <p>
+        The line between two nodes. It carries the output of one node into the next node.
+        You can <strong>branch</strong> (one node has two outgoing lines that go to different
+        places) and <strong>merge</strong> (two lines come back together).
+      </p>
+      <div class="think"><b>Drag-from-handle to connect.</b> Click the dot on a node's right edge and drag to another node.</div>
+    </div>
+
+    <div class="concept c-exec">
+      <span class="tag">04 / Execution</span>
+      <div class="ico-big">▶</div>
+      <h3>One <em style="color:var(--hot);">run</em> of the workflow</h3>
+      <p>
+        Every time the trigger fires (or you click Execute), n8n creates an execution
+        record. It saves the input and output of every node in that run. You can open any
+        past execution and replay it node by node — this is how you debug things.
+      </p>
+      <div class="think"><b>Saving lives:</b> when something breaks, go to Executions → click the failed run → see exactly which node failed and why.</div>
+    </div>
+
+    <div class="concept c-cred">
+      <span class="tag">05 / Credentials</span>
+      <div class="ico-big">⚿</div>
+      <h3>Your <em style="color:var(--hot);">keychain</em></h3>
+      <p>
+        API keys and login tokens, stored encrypted. You create them once per app (e.g. one
+        OpenAI credential, one Slack credential), and then any node that talks to that app
+        reuses it. Never appear in logs, exports, or your workflow JSON.
+      </p>
+      <div class="think"><b>First-time annoyance:</b> setting up credentials feels tedious. After 10 minutes, you have them all and never touch them again.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ NODES ============================ -->
+<section id="nodes" class="container">
+  <span class="eyebrow">06 · Node families</span>
+  <h2 style="margin-top:24px; max-width: 1000px;">Four <em>families</em> cover 95% of what you'll ever do.</h2>
+  <div class="prose">
+    <p>
+      n8n has 400+ nodes, but they all fall into 4 buckets. Click the tabs below to see what
+      lives in each. <span class="hl">You don't need to memorize anything</span> — just know
+      that when you need to "do X", you look in family Y.
+    </p>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="t-trigger">① Triggers (how it starts)</button>
+    <button class="tab" data-tab="t-action">② Actions (talking to apps)</button>
+    <button class="tab" data-tab="t-logic">③ Logic (making decisions)</button>
+    <button class="tab" data-tab="t-data">④ Data (cleaning the bag)</button>
+  </div>
+
+  <div class="tab-panel active" id="t-trigger">
+    <div>
+      <h3>How a workflow <em>wakes up</em>.</h3>
+      <p class="panel-lead">
+        A trigger node sits at the very beginning. Every other node only runs <em>because of</em> what the trigger gave it.
+        <br><br>
+        <em style="color:var(--paper-dim); font-style:italic; font-family:'Fraunces',serif;">
+          Picking the right trigger = half the design.
+        </em>
+        <br><br>
+        Ask yourself: "What makes this thing need to run?" If the answer is "I click a button", use Manual.
+        "Every morning at 9", use Schedule. "Someone fills my form", use Webhook. "Whenever something happens in app X",
+        use that app's trigger.
+      </p>
+    </div>
+    <div class="examples">
+      <div class="example"><div class="pill" style="background:var(--hot)">M</div><div><div class="name">Manual Trigger</div><div class="desc">Big button at the top. Useful when you're building/testing, or for one-off jobs.</div></div><div class="badge">dev / on-demand</div></div>
+      <div class="example"><div class="pill" style="background:var(--hot)">⏱</div><div><div class="name">Schedule (Cron)</div><div class="desc">"Every hour", "every Monday 9am", "1st of each month". Friendly dropdowns, no cron expressions needed.</div></div><div class="badge">recurring</div></div>
+      <div class="example"><div class="pill" style="background:var(--hot)">↘</div><div><div class="name">Webhook</div><div class="desc">n8n gives you a public URL. When something posts to it (a form, a payment, etc.), the workflow runs immediately.</div></div><div class="badge">real-time</div></div>
+      <div class="example"><div class="pill" style="background:var(--hot)">@</div><div><div class="name">Email Trigger (IMAP)</div><div class="desc">Connect to a Gmail / Outlook / any IMAP inbox. New email = workflow runs. Read the subject and body inside the workflow.</div></div><div class="badge">reactive</div></div>
+      <div class="example"><div class="pill" style="background:var(--hot)">★</div><div><div class="name">App triggers</div><div class="desc">"New row in Airtable", "New message in Slack channel #x", "New Stripe charge", "New Typeform submission". Hundreds of these.</div></div><div class="badge">native</div></div>
+      <div class="example"><div class="pill" style="background:var(--hot)">f</div><div><div class="name">Form Trigger</div><div class="desc">n8n hosts a public web form for you. Someone fills it → your workflow gets the answers as items.</div></div><div class="badge">no-code</div></div>
+      <div class="example"><div class="pill" style="background:var(--hot)">↺</div><div><div class="name">Chat Trigger</div><div class="desc">Public chat URL. Users type a message → your workflow (often an AI agent) replies. Build a chatbot in 10 minutes.</div></div><div class="badge">ai</div></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t-action">
+    <div>
+      <h3>Talking to the <em>outside world</em>.</h3>
+      <p class="panel-lead">
+        Action nodes are "do something with an app". Every app you've heard of (and lots you haven't) has a dedicated node, with friendly dropdowns:
+        "Operation: Send Message · Channel: #general · Text: hi".
+        <br><br>
+        <em style="color:var(--paper-dim); font-style:italic; font-family:'Fraunces',serif;">
+          If an app has an API, you can reach it. And if it doesn't, it isn't really an app.
+        </em>
+      </p>
+    </div>
+    <div class="examples">
+      <div class="example"><div class="pill" style="background:var(--cyan)">⊕</div><div><div class="name">HTTP Request</div><div class="desc">The Swiss Army knife. Calls any URL on the internet. Use this when there's no dedicated node for your app.</div></div><div class="badge">universal</div></div>
+      <div class="example"><div class="pill" style="background:var(--cyan)">⌬</div><div><div class="name">Postgres / MySQL / Supabase</div><div class="desc">Read or write your database directly. SELECT, INSERT, UPDATE — all from dropdowns or a query field.</div></div><div class="badge">database</div></div>
+      <div class="example"><div class="pill" style="background:var(--cyan)">∞</div><div><div class="name">Slack / Discord / Teams</div><div class="desc">Post messages, threads, DMs. React with emoji. Upload files. Build a full bot without a backend.</div></div><div class="badge">chat</div></div>
+      <div class="example"><div class="pill" style="background:var(--cyan)">▦</div><div><div class="name">Google Sheets / Notion / Airtable</div><div class="desc">The "office spreadsheet" trio. Append, lookup, update rows. Often where vibe-coded automations end up storing their state.</div></div><div class="badge">data store</div></div>
+      <div class="example"><div class="pill" style="background:var(--cyan)">✦</div><div><div class="name">OpenAI / Anthropic / Gemini</div><div class="desc">Send prompts, get answers. n8n also has a dedicated <i>AI Agent</i> node that handles tool-use for you.</div></div><div class="badge">ai / llm</div></div>
+      <div class="example"><div class="pill" style="background:var(--cyan)">$</div><div><div class="name">Stripe / Shopify / Razorpay</div><div class="desc">Read payments, refund, create customers, query orders. Whole e-commerce automations.</div></div><div class="badge">commerce</div></div>
+      <div class="example"><div class="pill" style="background:var(--cyan)">✉</div><div><div class="name">Gmail / SendGrid / Mailgun / SMTP</div><div class="desc">Send and read email. Templated bodies. Attachments. Reply-to threading. Bread and butter.</div></div><div class="badge">email</div></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t-logic">
+    <div>
+      <h3>When the workflow has to <em>think</em>.</h3>
+      <p class="panel-lead">
+        Logic nodes don't talk to apps — they decide what happens next. Branch into two paths, loop over items, wait until something happens, retry on error.
+        <br><br>
+        <em style="color:var(--paper-dim); font-style:italic; font-family:'Fraunces',serif;">
+          A readable workflow shows its logic in the shape of the canvas, not buried in node configs.
+        </em>
+      </p>
+    </div>
+    <div class="examples">
+      <div class="example"><div class="pill" style="background:var(--amber)">?</div><div><div class="name">IF</div><div class="desc">Two branches: TRUE / FALSE. "If the lead is on the Pro plan, do this; otherwise, do that." The most-used logic node, by far.</div></div><div class="badge">branch</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">⫶</div><div><div class="name">Switch</div><div class="desc">N branches based on a value. Like IF, but with more than two outcomes. Cleaner than chained IFs.</div></div><div class="badge">branch</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">∪</div><div><div class="name">Merge</div><div class="desc">Brings two branches back together. Append (stack rows), multiplex (zip), or join-by-field (like SQL JOIN).</div></div><div class="badge">join</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">↻</div><div><div class="name">Loop Over Items</div><div class="desc">Process items in batches (say, 10 at a time). Useful when an API limits how many you can send per call.</div></div><div class="badge">loop</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">⌚</div><div><div class="name">Wait</div><div class="desc">Pause the workflow. Until a date. For 5 minutes. Until a webhook arrives. Resume from exactly where it stopped.</div></div><div class="badge">delay</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">⚠</div><div><div class="name">Error Trigger</div><div class="desc">A whole separate workflow that runs when any other workflow fails. Use it to ping yourself on Slack when things break.</div></div><div class="badge">recovery</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">⊘</div><div><div class="name">Stop and Error</div><div class="desc">Halt the workflow on purpose with a custom error message. Useful for validation: "if amount &lt; 0, stop."</div></div><div class="badge">guard</div></div>
+      <div class="example"><div class="pill" style="background:var(--amber)">⊞</div><div><div class="name">Execute Workflow</div><div class="desc">Call one workflow from another. Used to keep things DRY and reuse logic across multiple flows.</div></div><div class="badge">modular</div></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t-data">
+    <div>
+      <h3>Reshaping the bag of <em>data</em>.</h3>
+      <p class="panel-lead">
+        Half of every real workflow is "this app's output doesn't quite match what the next app wants". Data nodes fix that. Rename fields, drop fields, combine arrays, format dates, parse HTML.
+        <br><br>
+        <em style="color:var(--paper-dim); font-style:italic; font-family:'Fraunces',serif;">
+          If you find yourself writing Code for three lines, use Set instead.
+        </em>
+      </p>
+    </div>
+    <div class="examples">
+      <div class="example"><div class="pill" style="background:var(--violet); color:var(--paper)">≡</div><div><div class="name">Edit Fields (Set)</div><div class="desc">Create, rename, or delete fields. No code. Drag fields from input on the left, name them on the right.</div></div><div class="badge">basic</div></div>
+      <div class="example"><div class="pill" style="background:var(--violet); color:var(--paper)">⨯</div><div><div class="name">Item Lists</div><div class="desc">Operations on arrays: split, aggregate, sort, limit, remove duplicates, summarize. The Excel of n8n.</div></div><div class="badge">array ops</div></div>
+      <div class="example"><div class="pill" style="background:var(--violet); color:var(--paper)">JS</div><div><div class="name">Code (JS / Python)</div><div class="desc">When dropdowns aren't enough. Write a small function that reads <code style="font-size:11px;">$input</code> and returns transformed items.</div></div><div class="badge">escape hatch</div></div>
+      <div class="example"><div class="pill" style="background:var(--violet); color:var(--paper)">⊟</div><div><div class="name">HTML / XML / Markdown</div><div class="desc">Parse webpages or feeds. Pull text out with CSS selectors ("get the price from span.amount").</div></div><div class="badge">parsing</div></div>
+      <div class="example"><div class="pill" style="background:var(--violet); color:var(--paper)">📅</div><div><div class="name">Date &amp; Time</div><div class="desc">Format dates, add/subtract days, get the current ISO timestamp, convert timezones. No moment.js needed.</div></div><div class="badge">dates</div></div>
+      <div class="example"><div class="pill" style="background:var(--violet); color:var(--paper)">⊜</div><div><div class="name">Filter</div><div class="desc">Like IF, but doesn't branch — just drops items that don't match. "Only keep items where price &gt; 100".</div></div><div class="badge">filter</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ EXPRESSIONS ============================ -->
+<section id="expressions" class="container">
+  <span class="eyebrow">07 · Expressions — the only "code" you need</span>
+  <h2 style="margin-top:24px; max-width:1100px;">The <em>magic syntax</em>: <code style="font-family:'JetBrains Mono',monospace; color:var(--acid); font-size:0.6em; background:var(--ink-2); border:1px solid var(--line); padding:6px 12px; border-radius:6px;">{{ }}</code></h2>
+  <div class="prose">
+    <p>
+      Every field in every node has a little toggle: <strong>"Fixed"</strong> (you type a
+      literal value, like <code class="inline">Hello world</code>) or <strong>"Expression"</strong>
+      (the value is computed from data flowing through the workflow).
+    </p>
+    <p>
+      When you switch a field to Expression mode, you can drop in <code class="inline">{{ ... }}</code> —
+      two curly braces — and inside them, write a tiny snippet that references your data.
+      <span class="hl">This is the only "code" you ever need to write in n8n.</span> Below are
+      the recipes you'll use 90% of the time. Click "Copy" to grab them.
+    </p>
+  </div>
+
+  <div class="expr">
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Field from the current item</h4>
+        <button class="copy" data-copy='{{ $json.email }}'>Copy</button>
+      </div>
+      <pre>{{ $json.email }}</pre>
+      <p class="note"><code class="inline">$json</code> means "the item currently flowing into this node". <code class="inline">.email</code> reaches into that JSON to grab the email field.</p>
+      <p class="english">Use the email of the current item.</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Output of an earlier node</h4>
+        <button class="copy" data-copy='{{ $node["HubSpot"].json.id }}'>Copy</button>
+      </div>
+      <pre>{{ $node["HubSpot"].json.id }}</pre>
+      <p class="note">Jump back several nodes. Useful when you've branched and need to refer to data from before the branch.</p>
+      <p class="english">Use the ID that the HubSpot node produced earlier.</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Dates — yesterday / 7 days ago</h4>
+        <button class="copy" data-copy='{{ $now.minus({ days: 7 }).toISO() }}'>Copy</button>
+      </div>
+      <pre>{{ $now.minus({ days: 7 }).toISO() }}</pre>
+      <p class="note">n8n ships with <strong>Luxon</strong> — a friendly date library. <code class="inline">$now</code> is the current time; <code class="inline">.minus()</code> subtracts; <code class="inline">.toISO()</code> outputs the timestamp.</p>
+      <p class="english">Give me the timestamp for exactly 7 days ago.</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Inline if / then</h4>
+        <button class="copy" data-copy='{{ $json.plan === "pro" ? "high priority" : "normal" }}'>Copy</button>
+      </div>
+      <pre>{{ $json.plan === "pro" ? "high priority" : "normal" }}</pre>
+      <p class="note">A "ternary": <code class="inline">condition ? value_if_true : value_if_false</code>. For more complex logic, use an IF node instead.</p>
+      <p class="english">If the plan is "pro", label this "high priority". Otherwise, "normal".</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Environment variables</h4>
+        <button class="copy" data-copy='{{ $env.SLACK_CHANNEL_ID }}'>Copy</button>
+      </div>
+      <pre>{{ $env.SLACK_CHANNEL_ID }}</pre>
+      <p class="note">Read a config value defined outside your workflow (in n8n's settings). Lets you switch between dev / prod channels without editing nodes.</p>
+      <p class="english">Use whatever channel ID is set in the environment.</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Format a number / string</h4>
+        <button class="copy" data-copy='{{ $json.amount.toFixed(2) }} USD'>Copy</button>
+      </div>
+      <pre>{{ $json.amount.toFixed(2) }} USD</pre>
+      <p class="note">Mix expressions with literal text. <code class="inline">.toFixed(2)</code> means "2 decimal places". You can also call <code class="inline">.toUpperCase()</code>, <code class="inline">.trim()</code>, etc.</p>
+      <p class="english">Show the amount with 2 decimals, then "USD".</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Get the first item from a list</h4>
+        <button class="copy" data-copy='{{ $json.results[0].name }}'>Copy</button>
+      </div>
+      <pre>{{ $json.results[0].name }}</pre>
+      <p class="note">Square brackets index into arrays. <code class="inline">[0]</code> = first, <code class="inline">[1]</code> = second, etc. (Yes, computers count from zero.)</p>
+      <p class="english">Get the name from the first result in the list.</p>
+    </div>
+
+    <div class="expr-card">
+      <div class="ttl">
+        <h4>Fallback if a field is empty</h4>
+        <button class="copy" data-copy='{{ $json.nickname || $json.name }}'>Copy</button>
+      </div>
+      <pre>{{ $json.nickname || $json.name }}</pre>
+      <p class="note">The <code class="inline">||</code> means "or". If the left side is empty/missing, use the right side. Lifesaver for optional fields.</p>
+      <p class="english">Use the nickname if there is one — otherwise the real name.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FIRST WORKFLOW ============================ -->
+<section id="first" class="container">
+  <span class="eyebrow">08 · Hands-on</span>
+  <h2 style="margin-top:24px; max-width: 1100px;">Let's build one: <em>"alert me on Slack when a paying lead signs up"</em>.</h2>
+
+  <div class="prose">
+    <p>
+      Walk through this once and you'll have done every fundamental n8n move. Pretend you have a signup
+      form on your landing page that posts to a URL. We'll catch it, filter for high-value leads, enrich
+      them, ping Slack, and log them in a sheet. Five nodes, ~10 minutes the first time.
+    </p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="num"></div>
+      <div>
+        <h3>Add the trigger: Webhook</h3>
+        <div class="body">
+          <p>Click the big "+" on the empty canvas, search "Webhook", drop it in. n8n shows you
+          two URLs — a <strong>Test URL</strong> (only listens while you're testing) and a
+          <strong>Production URL</strong> (always listens once your workflow is "Active").</p>
+          <p>For now, copy the Test URL into your form's "submit to" setting (or use a tool like Postman / curl). Submit the form once. You should see data appear inside the node.</p>
+          <div class="tipline">PRO TIP — click "Listen for test event", then submit your form, and n8n captures the real request so you can build the rest of the workflow against real data.</div>
+        </div>
+      </div>
+      <div class="visual">
+        <div class="row"><span class="c">// node 1 · Webhook</span></div>
+        <div class="row"><span class="k">method</span> <span class="v">"POST"</span></div>
+        <div class="row"><span class="k">path</span> <span class="v">"/lead-form"</span></div>
+        <div class="row"><span class="k">response</span> <span class="v">"immediately"</span></div>
+        <div class="row"><span class="dot"></span><span class="c">listening · webhook-id 8e21...</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num"></div>
+      <div>
+        <h3>Filter: only continue if plan = "pro"</h3>
+        <div class="body">
+          <p>Add an <strong>IF</strong> node. On the left side of the condition, click the
+          expression toggle, then drag the <code class="inline">plan</code> field from the
+          left panel onto the box. It auto-fills <code class="inline">{{ $json.body.plan }}</code>.</p>
+          <p>Operator: "equals". Right side: <code class="inline">pro</code>. Now the workflow
+          continues down the TRUE branch only when the plan is "pro". The FALSE branch can be left empty (the workflow just stops).</p>
+          <div class="tipline">PRO TIP — you can drag any field from the INPUT panel into any field. n8n writes the expression for you. No typing.</div>
+        </div>
+      </div>
+      <div class="visual">
+        <div class="row"><span class="c">// node 2 · IF</span></div>
+        <div class="row"><span class="k">left</span> <span class="v">{{ $json.body.plan }}</span></div>
+        <div class="row"><span class="k">operator</span> <span class="v">"equals"</span></div>
+        <div class="row"><span class="k">right</span> <span class="v">"pro"</span></div>
+        <div class="row"><span class="c">true → continue  ·  false → stop</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num"></div>
+      <div>
+        <h3>Enrich: HTTP Request (look up the company)</h3>
+        <div class="body">
+          <p>Add an <strong>HTTP Request</strong> node from the TRUE output of IF. Method: GET.
+          URL: <code class="inline">https://person.clearbit.com/v2/people/find</code>.</p>
+          <p>Under "Query parameters", add <code class="inline">email = {{ $json.body.email }}</code>.
+          Under "Authentication", create a new credential of type "Header Auth" — paste your
+          Clearbit API key. Click test → you should see the enriched person object in the
+          OUTPUT panel: name, company, role, etc.</p>
+          <div class="tipline">PRO TIP — most APIs work with "Header Auth" or "Bearer Token". When in doubt, check the API's docs page and search for "authentication".</div>
+        </div>
+      </div>
+      <div class="visual">
+        <div class="row"><span class="c">// node 3 · HTTP Request</span></div>
+        <div class="row"><span class="k">method</span> <span class="v">"GET"</span></div>
+        <div class="row"><span class="k">url</span> <span class="v">"https://person.clearbit.com/v2/people/find"</span></div>
+        <div class="row"><span class="k">query.email</span> <span class="v">{{ $json.body.email }}</span></div>
+        <div class="row"><span class="k">auth</span> <span class="v">"clearbit-api-key"</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num"></div>
+      <div>
+        <h3>Notify: Slack message</h3>
+        <div class="body">
+          <p>Add a <strong>Slack</strong> node. The first time, click "Create new credential"
+          → either OAuth (click "Sign in with Slack" and approve), or paste a Bot Token from your Slack app.</p>
+          <p>Operation: "Send a message". Channel: <code class="inline">#sales-hot-leads</code>.
+          Text: <code class="inline">🔥 New Pro lead — {{ $json.name }} from {{ $json.company.name }} ({{ $json.role }})</code>.</p>
+          <p>Click "Execute node" once to test. A real message appears in your Slack channel. If it doesn't, check the OUTPUT panel — the error message will tell you what's wrong (usually: wrong channel name, or the bot isn't invited to that channel).</p>
+        </div>
+      </div>
+      <div class="visual">
+        <div class="row"><span class="c">// node 4 · Slack</span></div>
+        <div class="row"><span class="k">operation</span> <span class="v">"sendMessage"</span></div>
+        <div class="row"><span class="k">channel</span> <span class="v">"#sales-hot-leads"</span></div>
+        <div class="row"><span class="k">text</span> <span class="v">"🔥 {{ $json.name }} · {{ $json.company.name }}"</span></div>
+        <div class="row"><span class="dot" style="background:var(--acid)"></span><span class="c">message_ts 1716...</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num"></div>
+      <div>
+        <h3>Persist: append a row to Google Sheets</h3>
+        <div class="body">
+          <p>Add a <strong>Google Sheets</strong> node in parallel (drag from the same Slack
+          node's input, or branch from earlier). Sign in with Google. Pick the spreadsheet,
+          the sheet/tab, operation "Append".</p>
+          <p>n8n reads your sheet's column headers automatically. You drag fields from the
+          left into each column. Done.</p>
+          <p>Now <strong>save the workflow</strong> (top-right), give it a name, and flip the
+          <strong>Active</strong> toggle in the top bar. The workflow is now live — every
+          form submission will trigger this whole chain automatically.</p>
+          <div class="tipline">🎉 CONGRATS — you just built an automation. Refresh the page; go to "Executions"; you'll see your test run logged with every node's input/output preserved.</div>
+        </div>
+      </div>
+      <div class="visual">
+        <div class="row"><span class="c">// node 5 · Google Sheets</span></div>
+        <div class="row"><span class="k">operation</span> <span class="v">"appendRow"</span></div>
+        <div class="row"><span class="k">sheet</span> <span class="v">"leads_2026"</span></div>
+        <div class="row"><span class="k">columns</span> <span class="v">{ email, name, company, plan }</span></div>
+        <div class="row"><span class="dot" style="background:var(--acid)"></span><span class="c">execution complete · 124ms</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ RECIPES ============================ -->
+<section id="recipes" class="container">
+  <span class="eyebrow">09 · Real-world recipes</span>
+  <h2 style="margin-top:24px; max-width: 1100px;">Four <em>full workflows</em> you can actually build this weekend.</h2>
+  <div class="prose">
+    <p>
+      Each recipe lists the trigger, the nodes in order, and a one-line explanation of what each
+      node does. None of these require code — only configuration. Use them as blueprints.
+    </p>
+  </div>
+
+  <div class="recipes">
+    <div class="recipe">
+      <div class="head">
+        <h3>① <em>"Daily AI news digest"</em> in your inbox at 8am</h3>
+        <div class="badge-row">
+          <span>~20 min</span>
+          <span>cost: openai api</span>
+          <span>level: easy</span>
+        </div>
+        <p class="when">Every morning at 8am, scrape AI-related headlines, summarize them with GPT, and email yourself a clean digest. Replace "AI" with any topic.</p>
+      </div>
+      <div class="flow">
+        <div class="line"><span class="ix">01</span><span class="nd">Schedule</span><span class="ds">Cron: every day at 8:00am.</span></div>
+        <div class="line"><span class="ix">02</span><span class="nd">RSS Read</span><span class="ds">Pull from <code class="inline">https://news.ycombinator.com/rss</code>, TechCrunch, etc.</span></div>
+        <div class="line"><span class="ix">03</span><span class="nd">Filter</span><span class="ds">Keep items where title contains "AI", "LLM", "GPT", "Anthropic", "OpenAI".</span></div>
+        <div class="line"><span class="ix">04</span><span class="nd">Item Lists</span><span class="ds">Aggregate the top 10 into a single bundle.</span></div>
+        <div class="line"><span class="ix">05</span><span class="nd">OpenAI</span><span class="ds">Prompt: "Summarize these headlines into 5 bullet points, focus on what's actually new."</span></div>
+        <div class="line"><span class="ix">06</span><span class="nd">Gmail</span><span class="ds">Send to yourself. Subject: "Your AI digest — {{ $now.toFormat('LLL dd') }}".</span></div>
+      </div>
+    </div>
+
+    <div class="recipe">
+      <div class="head">
+        <h3>② <em>"Customer signup → Notion CRM + welcome email"</em></h3>
+        <div class="badge-row">
+          <span>~30 min</span>
+          <span>cost: free</span>
+          <span>level: easy</span>
+        </div>
+        <p class="when">A new customer fills your signup form. Add them to a Notion database, send them a personalized welcome, and ping #new-signups in Slack — all in &lt; 2 seconds.</p>
+      </div>
+      <div class="flow">
+        <div class="line"><span class="ix">01</span><span class="nd">Webhook</span><span class="ds">Form posts to this URL with name, email, company.</span></div>
+        <div class="line"><span class="ix">02</span><span class="nd">Edit Fields</span><span class="ds">Clean the data: trim spaces, lowercase the email, add today's date.</span></div>
+        <div class="line"><span class="ix">03</span><span class="nd">Notion</span><span class="ds">Create a new page in the "Customers" database. Map fields to columns.</span></div>
+        <div class="line"><span class="ix">04</span><span class="nd">Gmail</span><span class="ds">Send a welcome email. Body uses <code class="inline">{{ $json.name }}</code> for personalization.</span></div>
+        <div class="line"><span class="ix">05</span><span class="nd">Slack</span><span class="ds">Post to #new-signups so the team sees it live.</span></div>
+      </div>
+    </div>
+
+    <div class="recipe">
+      <div class="head">
+        <h3>③ <em>"AI-powered support triage"</em></h3>
+        <div class="badge-row">
+          <span>~60 min</span>
+          <span>cost: openai api</span>
+          <span>level: medium</span>
+        </div>
+        <p class="when">New support emails come in. An LLM classifies each one (bug / billing / feature request) and routes it to the right Slack channel + tags it in Linear automatically.</p>
+      </div>
+      <div class="flow">
+        <div class="line"><span class="ix">01</span><span class="nd">Gmail Trigger</span><span class="ds">New email in inbox <code class="inline">support@yourdomain.com</code>.</span></div>
+        <div class="line"><span class="ix">02</span><span class="nd">OpenAI (structured)</span><span class="ds">Prompt: "Classify this email as bug / billing / feature. Return JSON: {category, urgency, summary}".</span></div>
+        <div class="line"><span class="ix">03</span><span class="nd">Switch</span><span class="ds">Branch on <code class="inline">{{ $json.category }}</code> — 3 outputs.</span></div>
+        <div class="line"><span class="ix">04a</span><span class="nd">Slack #bugs</span><span class="ds">Bug branch: post to engineering channel with summary + email link.</span></div>
+        <div class="line"><span class="ix">04b</span><span class="nd">Slack #billing</span><span class="ds">Billing branch: post to ops channel + auto-reply with help link.</span></div>
+        <div class="line"><span class="ix">04c</span><span class="nd">Linear</span><span class="ds">Feature branch: create an issue with tag "user-request".</span></div>
+      </div>
+    </div>
+
+    <div class="recipe">
+      <div class="head">
+        <h3>④ <em>"Personal LinkedIn / Twitter cross-poster"</em></h3>
+        <div class="badge-row">
+          <span>~45 min</span>
+          <span>cost: free</span>
+          <span>level: medium</span>
+        </div>
+        <p class="when">You write one post in a Notion database. Marked as "ready"? n8n picks it up, reformats per platform (LinkedIn allows longer; X has a 280-char limit), and publishes everywhere on schedule.</p>
+      </div>
+      <div class="flow">
+        <div class="line"><span class="ix">01</span><span class="nd">Schedule</span><span class="ds">Every hour, check Notion.</span></div>
+        <div class="line"><span class="ix">02</span><span class="nd">Notion</span><span class="ds">Query: status = "ready", scheduled_at &lt;= now.</span></div>
+        <div class="line"><span class="ix">03</span><span class="nd">OpenAI</span><span class="ds">Reformat the long version into a thread under 280 chars per tweet.</span></div>
+        <div class="line"><span class="ix">04</span><span class="nd">X (Twitter)</span><span class="ds">Post the thread.</span></div>
+        <div class="line"><span class="ix">05</span><span class="nd">LinkedIn</span><span class="ds">Post the long version verbatim.</span></div>
+        <div class="line"><span class="ix">06</span><span class="nd">Notion</span><span class="ds">Update the page: status = "published", published_at = now.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PATTERNS ============================ -->
+<section id="patterns" class="container">
+  <span class="eyebrow">10 · Patterns to copy</span>
+  <h2 style="margin-top:24px; max-width: 1000px;">Six <em>moves</em> you'll repeat a thousand times.</h2>
+  <div class="prose">
+    <p>
+      Once you've built a few workflows, you'll start noticing the same shapes appear over and over.
+      Memorize these — they're the bread and butter of professional-grade automations.
+    </p>
+  </div>
+
+  <div class="patterns">
+    <div class="pattern">
+      <div class="head">
+        <div>
+          <h4>Fan-out / Fan-in</h4>
+          <div class="tag-line">Split → process → Merge</div>
+        </div>
+        <div class="ico-mini">⊥</div>
+      </div>
+      <p>You have 100 orders. Each needs an API call to enrich it. You run them in parallel, then Merge them back into a single list before saving to your database.</p>
+      <div class="use"><b>When:</b> any time you have a list of things that each need work, and you want it fast.</div>
+    </div>
+
+    <div class="pattern">
+      <div class="head">
+        <div>
+          <h4>Polling with cursor</h4>
+          <div class="tag-line">Schedule + last-run timestamp</div>
+        </div>
+        <div class="ico-mini">↻</div>
+      </div>
+      <p>Every 5 minutes, read your "last processed time" from a database / variable. Ask the API only for items <em>after</em> that timestamp. Update the cursor when done. Never re-process the same data twice.</p>
+      <div class="use"><b>When:</b> the app you care about doesn't offer webhooks and you don't want to re-process the whole history.</div>
+    </div>
+
+    <div class="pattern">
+      <div class="head">
+        <div>
+          <h4>Centralized error workflow</h4>
+          <div class="tag-line">Error Trigger → Slack #alerts</div>
+        </div>
+        <div class="ico-mini">⚠</div>
+      </div>
+      <p>One workflow has just an <strong>Error Trigger</strong> + a Slack node. In every other workflow's settings, set this one as the "Error workflow". Now any failure anywhere pings #alerts with the workflow name and execution ID.</p>
+      <div class="use"><b>When:</b> always. It's the difference between knowing things broke and finding out a week later.</div>
+    </div>
+
+    <div class="pattern">
+      <div class="head">
+        <div>
+          <h4>Idempotency by lookup</h4>
+          <div class="tag-line">SELECT before INSERT</div>
+        </div>
+        <div class="ico-mini">≠</div>
+      </div>
+      <p>Before saving anything, look it up by a unique ID (Stripe charge ID, Shopify order ID, email). If it exists, skip or update. If not, insert. Protects you from duplicate webhook deliveries and retries.</p>
+      <div class="use"><b>When:</b> any workflow that writes to a database. Non-negotiable.</div>
+    </div>
+
+    <div class="pattern">
+      <div class="head">
+        <div>
+          <h4>Respond fast, work slow</h4>
+          <div class="tag-line">Respond to Webhook node</div>
+        </div>
+        <div class="ico-mini">↩</div>
+      </div>
+      <p>The webhook trigger sends "200 OK" back instantly, then the rest of the workflow runs at its own pace. Stripe, Shopify, Zendesk all expect &lt; 5s acknowledgement or they retry — even if your actual work takes 30 seconds.</p>
+      <div class="use"><b>When:</b> any incoming webhook from a real service.</div>
+    </div>
+
+    <div class="pattern">
+      <div class="head">
+        <div>
+          <h4>Sub-workflows for reuse</h4>
+          <div class="tag-line">Execute Workflow node</div>
+        </div>
+        <div class="ico-mini">⊞</div>
+      </div>
+      <p>If three workflows all need to "find a customer in HubSpot, then Salesforce, then your CRM, then merge the results", build that logic once and call it from all three with the Execute Workflow node.</p>
+      <div class="use"><b>When:</b> you find yourself copy-pasting groups of nodes between workflows.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ AI ============================ -->
+<section id="ai" class="container">
+  <span class="eyebrow">11 · AI in n8n</span>
+  <h2 style="margin-top:24px; max-width: 1100px;">n8n is, secretly, an <em>AI workflow builder</em>.</h2>
+  <div class="prose">
+    <p>
+      n8n has gone hard on AI nodes since 2024. You can build chatbots, RAG (retrieval-augmented
+      generation) systems, agents with tool use, and full LangChain-style pipelines — all visually.
+      For a vibe coder, this is the killer feature. Here's the three pieces that matter:
+    </p>
+  </div>
+
+  <div class="ai-grid">
+    <div class="ai-card">
+      <div class="ai-ico">★</div>
+      <h4>AI Agent node</h4>
+      <p>
+        Give it a system prompt, attach "tools" (other nodes!), and it figures out which ones
+        to call to answer a user's question. Want an agent that can look up customers in your
+        DB and reply on Slack? That's literally 3 nodes: Chat Trigger → AI Agent (with
+        Postgres + Slack as tools) → done.
+      </p>
+    </div>
+    <div class="ai-card">
+      <div class="ai-ico">⊟</div>
+      <h4>Vector stores</h4>
+      <p>
+        Pinecone, Supabase, Qdrant, Postgres pgvector, etc. — all as nodes. Upload your docs
+        once, then query them in any workflow. The "Retrieval" sub-node feeds context to your
+        LLM automatically. Build a "chat with your PDFs" in an afternoon.
+      </p>
+    </div>
+    <div class="ai-card">
+      <div class="ai-ico">≡</div>
+      <h4>Structured output</h4>
+      <p>
+        Tell the LLM to return JSON with a specific shape (categories, scores, fields). n8n
+        validates it and gives you typed fields downstream. No more parsing "the model said
+        'yes I think' " — get back <code class="inline">{ category: "bug", urgency: 4 }</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class="analogy cyan" style="margin-top: 40px;">
+    <p>
+      The model used to be the hard part. Now it's a 5-second config: pick the provider,
+      paste an API key, type a prompt. The hard part — orchestrating <em>when</em> to call
+      it, with what data, and what to do with the answer — is exactly what n8n is good at.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ ERRORS ============================ -->
+<section id="errors" class="container">
+  <span class="eyebrow">12 · Error decoder</span>
+  <h2 style="margin-top:24px; max-width: 1100px;">The <em>red boxes</em> you'll see, and what they actually mean.</h2>
+  <div class="prose">
+    <p>
+      When a node fails, it turns red and shows a message. Here are the most common ones,
+      decoded into human language with the actual fix:
+    </p>
+  </div>
+
+  <div class="errors">
+    <div class="err">
+      <div class="msg">401 Unauthorized · Authentication failed</div>
+      <div class="fix"><b>What it means:</b> the API didn't like your credentials. The API key is wrong, expired, or for the wrong account. <br><b>Fix:</b> open the node's credential, paste the key fresh, click "Save". For OAuth, click "Reconnect".</div>
+    </div>
+    <div class="err">
+      <div class="msg">429 Too Many Requests · Rate limit exceeded</div>
+      <div class="fix"><b>What it means:</b> you hit the app's "no more than X calls per minute" wall. <br><b>Fix:</b> add a Wait node before the action (e.g. 2s between calls), or use Loop Over Items with smaller batches. Many nodes have a "Retry on fail" toggle in their settings.</div>
+    </div>
+    <div class="err">
+      <div class="msg">Cannot read property 'X' of undefined</div>
+      <div class="fix"><b>What it means:</b> your expression tried to grab a field that doesn't exist on this item. Maybe sometimes the field is missing. <br><b>Fix:</b> use a fallback: <code class="inline">{{ $json.field || "" }}</code>. Or add an IF / Filter before this node to skip items without the field.</div>
+    </div>
+    <div class="err">
+      <div class="msg">Webhook URL is not registered</div>
+      <div class="fix"><b>What it means:</b> you're hitting the Test URL but you didn't click "Listen for test event" first; or you're hitting the Production URL but the workflow isn't Active. <br><b>Fix:</b> activate the workflow (toggle in the top bar) and use the Production URL, OR click "Listen for test event" and use the Test URL.</div>
+    </div>
+    <div class="err">
+      <div class="msg">No data returned · empty array</div>
+      <div class="fix"><b>What it means:</b> the previous node ran successfully but didn't produce any items. Everything after will be skipped silently. <br><b>Fix:</b> check the previous node's OUTPUT panel. Maybe your filter is too strict, or your query returned nothing.</div>
+    </div>
+    <div class="err">
+      <div class="msg">Execution stopped: workflow execution timeout</div>
+      <div class="fix"><b>What it means:</b> the workflow ran longer than n8n's max duration (default ~5 min on Cloud, configurable on self-hosted). <br><b>Fix:</b> split the work — process in batches with Loop Over Items, or use a Webhook + Respond Now + Execute Workflow async pattern.</div>
+    </div>
+    <div class="err">
+      <div class="msg">JSON parameter needs to be valid JSON</div>
+      <div class="fix"><b>What it means:</b> you typed something into a field that expects JSON, but it's malformed (missing comma, unquoted key, etc.). <br><b>Fix:</b> paste your JSON into <a href="https://jsonlint.com" style="color:var(--cyan); border-bottom:1px dashed;">jsonlint.com</a> to find the typo. Or switch the field to Expression mode and let n8n build the object for you.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TIPS ============================ -->
+<section id="tips" class="container">
+  <span class="eyebrow">13 · Lessons learned the hard way</span>
+  <h2 style="margin-top:24px; max-width:1100px;">Unwritten rules that <em>save you a week</em>.</h2>
+
+  <div class="tips">
+    <div class="tip do">
+      <span class="kind">DO</span>
+      <div>
+        <h4>Name your nodes.</h4>
+        <p>"HTTP Request" tells you nothing. Rename it to <code>get-stripe-charges</code>. Then when you reference it elsewhere (<code>$node["get-stripe-charges"]</code>), the workflow reads itself. When something breaks at 3am, future-you will love past-you.</p>
+      </div>
+    </div>
+
+    <div class="tip dont">
+      <span class="kind">DON'T</span>
+      <div>
+        <h4>Don't dump business logic into Code nodes.</h4>
+        <p>It's tempting: "one 80-line JS function would solve everything". The problem: no one else can read it, you can't debug visually, and item handling gets weird. If you need <i>that much</i> code, it probably belongs in a small backend service — not a workflow.</p>
+      </div>
+    </div>
+
+    <div class="tip do">
+      <span class="kind">DO</span>
+      <div>
+        <h4>Use Pin Data while building.</h4>
+        <p>After a node runs successfully once, right-click → <i>Pin Data</i>. n8n then reuses that cached output instead of re-calling the real API. You can iterate the rest of the workflow forever without burning API calls or hitting rate limits.</p>
+      </div>
+    </div>
+
+    <div class="tip wow">
+      <span class="kind">PRO</span>
+      <div>
+        <h4>The right-hand panel is your console.</h4>
+        <p>Click any node after a run. Left = INPUT (what came in), right = OUTPUT (what this node produced). Switch between "Table / JSON / Schema" views. The Schema view tells you the exact paths to use in <code>{{ $json.path }}</code> expressions — copy-pasteable.</p>
+      </div>
+    </div>
+
+    <div class="tip dont">
+      <span class="kind">DON'T</span>
+      <div>
+        <h4>Don't trust webhooks to fire exactly once.</h4>
+        <p>Stripe retries. Shopify retries. You yourself will manually "resend" when something fails. If your workflow isn't idempotent (lookup-before-write), you'll see duplicates in production within a week. Dedup by an external ID before any database write.</p>
+      </div>
+    </div>
+
+    <div class="tip do">
+      <span class="kind">DO</span>
+      <div>
+        <h4>Export your workflows to JSON and put them in Git.</h4>
+        <p>Settings → Download. The file is a clean JSON — diffable, mergeable, restorable. Even if you never set up CI/CD, having a versioned copy in a private GitHub repo saves you from accidental deletes and gives you change history.</p>
+      </div>
+    </div>
+
+    <div class="tip wow">
+      <span class="kind">PRO</span>
+      <div>
+        <h4>Each node decides how to run: once per item, or once for all.</h4>
+        <p>In the node's Settings tab: "Run Once for All Items" vs "Run Once for Each Item". HTTP Request that needs 1 call per item? Use the second. Code that aggregates everything into a single thing? Use the first. Mixing them up causes the most baffling bugs in n8n.</p>
+      </div>
+    </div>
+
+    <div class="tip dont">
+      <span class="kind">DON'T</span>
+      <div>
+        <h4>Don't paste API keys into node fields.</h4>
+        <p>Always use Credentials, even for "it's just a test key". Workflows get exported, shared, accidentally committed. Credentials stay encrypted in n8n's keystore and never appear in the workflow's JSON.</p>
+      </div>
+    </div>
+
+    <div class="tip do">
+      <span class="kind">DO</span>
+      <div>
+        <h4>Browse Templates before building from scratch.</h4>
+        <p>n8n's template gallery has hundreds of pre-built workflows. Search "Notion CRM", "Slack reminder", "RSS digest" — odds are someone already built ~80% of what you want. Import, tweak, rename. Don't reinvent.</p>
+      </div>
+    </div>
+
+    <div class="tip wow">
+      <span class="kind">PRO</span>
+      <div>
+        <h4>Sticky Notes are documentation.</h4>
+        <p>Right-click canvas → Add Sticky Note. They're colored boxes you can place anywhere with markdown text. Use them to label sections ("everything below = email pipeline") and to leave warnings ("don't change order — the API rate-limits us"). Future-proof your workflow against the version of you that forgot.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GLOSSARY ============================ -->
+<section id="glossary" class="container">
+  <span class="eyebrow">14 · Glossary</span>
+  <h2 style="margin-top:24px; max-width: 1100px;">Every <em>word</em> you'll hear in any n8n conversation.</h2>
+
+  <dl class="gloss">
+    <dt>Workflow</dt>
+    <dd>The whole automation — your canvas with all its nodes and connections. One file, one job.</dd>
+
+    <dt>Node</dt>
+    <dd>One box on the canvas. Does one thing. Has inputs (data coming in) and outputs (data going out).</dd>
+
+    <dt>Item</dt>
+    <dd>A single JSON object passed between nodes. A node always receives a <b>list</b> of items, even if there's just one.</dd>
+
+    <dt>Binary data</dt>
+    <dd>Files — PDFs, images, etc. — that travel alongside the JSON. Handled separately because they're not text.</dd>
+
+    <dt>Execution</dt>
+    <dd>A single run of a workflow. Has input, output per node, status (success/error), and duration. Saved in the Executions log.</dd>
+
+    <dt>Trigger node</dt>
+    <dd>The very first node. Without one, the workflow can't start. Only one allowed per workflow.</dd>
+
+    <dt>Credential</dt>
+    <dd>Stored login info for an external app (API key, OAuth token, etc). Made once, reused by every node that talks to that app.</dd>
+
+    <dt>Expression</dt>
+    <dd>Anything inside <code class="inline">{{ }}</code>. A tiny JS snippet that pulls dynamic data into a field at runtime.</dd>
+
+    <dt>Sticky note</dt>
+    <dd>A colored note you place on the canvas for documentation. Does nothing — it's just for humans reading the workflow.</dd>
+
+    <dt>Sub-workflow</dt>
+    <dd>A workflow called from another workflow (via Execute Workflow node). Useful for encapsulating reusable logic.</dd>
+
+    <dt>Active vs Inactive</dt>
+    <dd>The toggle in the top bar. Active = triggers are live and the workflow runs in production. Inactive = only runs when you manually click Execute.</dd>
+
+    <dt>Test URL vs Production URL</dt>
+    <dd>(Webhooks only.) Test URL only listens while you're in the editor with "Listen" enabled. Production URL listens 24/7 — but only if the workflow is Active.</dd>
+
+    <dt>Self-hosted</dt>
+    <dd>You run n8n on your own server (Docker, k8s, Railway, etc.). Free for internal use. Versus n8n Cloud, which is their hosted SaaS.</dd>
+
+    <dt>Community node</dt>
+    <dd>A third-party node not built by the n8n team. Self-host only. Lets you extend with weird custom integrations.</dd>
+
+    <dt>Pin Data</dt>
+    <dd>Right-click on a node → Pin Data. Freezes its output. Future runs use the frozen data instead of re-calling the real API.</dd>
+
+    <dt>AI Agent</dt>
+    <dd>A specialized n8n node that uses an LLM to decide which other nodes (called "tools") to call. The basis for building chatbots and autonomous helpers.</dd>
+  </dl>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer>
+  <div class="container">
+    <div class="row1">
+      <h2>Now go <em>build</em> something.</h2>
+      <p style="max-width: 380px; color: var(--paper-dim); font-family:'Fraunces',serif; font-style:italic; font-size: 19px;">
+        The n8n learning curve is flat: 1 hour to your first running workflow.
+        Depth — patterns, sub-workflows, AI agents — shows up on its own when you need it.
+      </p>
+    </div>
+
+    <div class="links-cluster">
+      <a class="link-card" href="https://docs.n8n.io" target="_blank" rel="noopener">
+        <span class="lk">Official docs</span><span class="ar">↗</span>
+      </a>
+      <a class="link-card" href="https://n8n.io/workflows" target="_blank" rel="noopener">
+        <span class="lk">Template gallery</span><span class="ar">↗</span>
+      </a>
+      <a class="link-card" href="https://community.n8n.io" target="_blank" rel="noopener">
+        <span class="lk">Community forum</span><span class="ar">↗</span>
+      </a>
+      <a class="link-card" href="https://github.com/n8n-io/n8n" target="_blank" rel="noopener">
+        <span class="lk">GitHub repo</span><span class="ar">↗</span>
+      </a>
+      <a class="link-card" href="https://www.youtube.com/@n8n-io" target="_blank" rel="noopener">
+        <span class="lk">YouTube channel</span><span class="ar">↗</span>
+      </a>
+      <a class="link-card" href="https://n8n.io/courses" target="_blank" rel="noopener">
+        <span class="lk">Free video courses</span><span class="ar">↗</span>
+      </a>
+    </div>
+
+    <div class="row2">
+      <div>n8n · vibe coder's guide · en</div>
+      <div>made with <span style="color:var(--hot)">♥</span> &amp; too much coffee</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ============== Play the demo workflow ==============
+  const runBtn = document.getElementById('runBtn');
+  const wires  = ['w1','w2','w3','w4','w5'].map(id => document.getElementById(id));
+  const nodes  = Array.from(document.querySelectorAll('#canvas .node'));
+
+  function reset() {
+    wires.forEach(w => w.classList.remove('active'));
+    nodes.forEach(n => n.classList.remove('lit'));
+  }
+
+  async function play() {
+    reset();
+    runBtn.disabled = true;
+    const seq = [
+      { node: 0, wire: null },
+      { node: 1, wire: 0 },
+      { node: 2, wire: 1 },
+      { node: 3, wire: 2 },
+      { node: 4, wire: 3 }
+    ];
+    for (let i = 0; i < seq.length; i++) {
+      const s = seq[i];
+      if (s.wire !== null) wires[s.wire].classList.add('active');
+      nodes[s.node].classList.add('lit');
+      await new Promise(r => setTimeout(r, 650));
+    }
+    wires[4].classList.add('active');
+    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 1200));
+    reset();
+    runBtn.disabled = false;
+  }
+
+  runBtn.addEventListener('click', play);
+  window.addEventListener('load', () => setTimeout(play, 900));
+
+  // ============== Tabs ==============
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  }));
+
+  // ============== Copy buttons ==============
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1400);
+      } catch (e) { btn.textContent = 'Err'; }
+    });
+  });
+
+  // ============== Rise on scroll ==============
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('rise');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('section h2, .concept, .pattern, .step, .expr-card, .tip, .recipe, .err, .ai-card, .option').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
